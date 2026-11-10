@@ -2,6 +2,7 @@ package com.hamzatech.publisher.provider;
 
 import com.hamzatech.publisher.service.ConfigService;
 import com.hamzatech.publisher.service.GeminiService;
+import com.hamzatech.publisher.service.KeyCheck;
 
 import java.io.IOException;
 
@@ -26,6 +27,21 @@ public class GeminiContentGenerator implements ContentGenerator {
     @Override
     public String displayName() {
         return "Gemini (Google)";
+    }
+
+    @Override
+    public String apiKeySetting() {
+        return ConfigService.GEMINI_API_KEY;
+    }
+
+    @Override
+    public String apiKeyPage() {
+        return "https://aistudio.google.com/app/apikey";
+    }
+
+    @Override
+    public KeyCheck.Result checkKey(String apiKey) {
+        return KeyCheck.gemini(apiKey);
     }
 
     @Override

@@ -346,6 +346,18 @@ public class BloggerService {
         }
     }
 
+    /**
+     * هل يوجد ملف OAuth في أيٍّ من أماكن البحث؟ بدونه لا يبدأ تسجيل الدخول أصلًا،
+     * فمعالج الإعداد يسأل قبل أن يعرض الزر.
+     */
+    public boolean hasCredentialsFile() {
+        try (InputStream in = openCredentialsStream()) {
+            return in != null;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     public void login() throws GeneralSecurityException, IOException {
         log.info("Starting login process");
         ensureClientInitialized(true);

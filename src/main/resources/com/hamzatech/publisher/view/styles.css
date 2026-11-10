@@ -194,6 +194,7 @@
 .rate-value { -fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis; }
 .status-success { -fx-text-fill: -color-success-fg; -fx-icon-color: -color-success-fg; }
 .status-failure { -fx-text-fill: -color-danger-fg; -fx-icon-color: -color-danger-fg; }
+.status-warning { -fx-text-fill: -color-warning-fg; -fx-icon-color: -color-warning-fg; }
 .activity-chart { -fx-padding: 0; }
 .activity-chart .default-color0.chart-bar { -fx-bar-fill: -color-success-emphasis; }
 .activity-chart .default-color1.chart-bar { -fx-bar-fill: -color-danger-emphasis; }
@@ -202,3 +203,6 @@
 .activity-chart .chart-plot-background { -fx-background-color: transparent; }
 .activity-chart .chart-vertical-grid-lines { -fx-stroke: transparent; }
 .overview-content .table-view { -fx-border-width: 0; }
+
+/* معالج الإعداد: بطاقة شاشة الدخول نفسها، بمحاذاة البداية لا التوسيط */
+.setup-card { -fx-alignment: top-left; -fx-padding: 32; }

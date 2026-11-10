@@ -52,6 +52,7 @@ public class ConfigService {
     public static final String SKIP_DUPLICATES = "skip.duplicates"; // تخطّي ما نُشر من قبل
     public static final String TELEGRAM_BOT_TOKEN = "telegram.bot.token"; // توكن بوت من @BotFather
     public static final String FACEBOOK_PAGE_TOKEN = "facebook.page.token"; // Page (أو User) Access Token طويل الأمد
+    public static final String SETUP_COMPLETED = "setup.completed"; // أُنهي معالج الإعداد أو تُخطّي
     private static final String CONFIG_FILE = "config.properties";
 
     /**
@@ -433,5 +434,14 @@ public class ConfigService {
 
     public void setSkipDuplicates(boolean skip) {
         set(SKIP_DUPLICATES, String.valueOf(skip));
+    }
+
+    /** هل أنهى المستخدم معالج الإعداد أو تخطّاه؟ انظر {@link FirstRun}. */
+    public boolean isSetupCompleted() {
+        return "true".equals(get(SETUP_COMPLETED));
+    }
+
+    public void setSetupCompleted(boolean completed) {
+        set(SETUP_COMPLETED, completed ? "true" : null);
     }
 }

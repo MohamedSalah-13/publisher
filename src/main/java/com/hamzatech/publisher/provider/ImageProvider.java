@@ -8,7 +8,7 @@ import java.util.Set;
  *
  * @see ContentGenerator لسبب وجود هذه الواجهة
  */
-public interface ImageProvider {
+public interface ImageProvider extends KeyedProvider {
 
     /** المعرّف المخزَّن في الإعدادات، مثل {@code "unsplash"}. */
     String id();

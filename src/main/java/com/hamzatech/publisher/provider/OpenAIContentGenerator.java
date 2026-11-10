@@ -1,6 +1,7 @@
 package com.hamzatech.publisher.provider;
 
 import com.hamzatech.publisher.service.ConfigService;
+import com.hamzatech.publisher.service.KeyCheck;
 import com.hamzatech.publisher.service.OpenAIService;
 
 import java.io.IOException;
@@ -27,6 +28,21 @@ public class OpenAIContentGenerator implements ContentGenerator {
     @Override
     public String displayName() {
         return "ChatGPT (OpenAI)";
+    }
+
+    @Override
+    public String apiKeySetting() {
+        return ConfigService.OPENAI_API_KEY;
+    }
+
+    @Override
+    public String apiKeyPage() {
+        return "https://platform.openai.com/api-keys";
+    }
+
+    @Override
+    public KeyCheck.Result checkKey(String apiKey) {
+        return KeyCheck.openAi(apiKey);
     }
 
     @Override

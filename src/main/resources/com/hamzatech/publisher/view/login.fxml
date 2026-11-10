@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.image.ImageView?>
@@ -13,7 +14,7 @@
            fx:controller="com.hamzatech.publisher.controller.LoginController"
            prefHeight="500.0" prefWidth="400.0" styleClass="root-pane" stylesheets="@styles.css">
 
-    <VBox alignment="CENTER" spacing="20.0" maxWidth="300" maxHeight="400" styleClass="login-card">
+    <VBox alignment="CENTER" spacing="20.0" maxWidth="320" maxHeight="480" styleClass="login-card">
 
         <FontIcon iconLiteral="fth-globe" iconSize="40" styleClass="app-icon"/>
 
@@ -39,6 +40,9 @@
         </VBox>
 
         <Label fx:id="lblError" styleClass="danger" visible="false" wrapText="true"/>
+
+        <Button onAction="#handleContinueWithoutGoogle" text="%login.skip" styleClass="flat"/>
+        <Hyperlink onAction="#handleSetupWizard" text="%login.setup"/>
 
     </VBox>
 </StackPane>

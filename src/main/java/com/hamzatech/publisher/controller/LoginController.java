@@ -1,13 +1,9 @@
 package com.hamzatech.publisher.controller;
 
 import com.hamzatech.publisher.service.BloggerService;
-import com.hamzatech.publisher.util.AppWindow;
 import com.hamzatech.publisher.util.LocaleManager;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -132,24 +128,26 @@ public class LoginController {
         return false;
     }
 
+    /**
+     * ووردبريس لا يحتاج حساب Google؛ اللوحة تعرض المواقع المحفوظة وحدها حين لا
+     * توجد جلسة Blogger.
+     */
+    @FXML
+    public void handleContinueWithoutGoogle() {
+        log.info("User continued without signing in to Google");
+        loadDashboard();
+    }
+
+    @FXML
+    public void handleSetupWizard() {
+        Screens.showSetupWizard((Stage) btnLogin.getScene().getWindow());
+    }
+
     private void loadDashboard() {
         try {
             log.debug("Loading dashboard view");
-            ResourceBundle bundle = localeManager.getResourceBundle();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hamzatech/publisher/view/dashboard.fxml"), bundle);
-            Parent root = loader.load();
-
-            Scene scene = AppWindow.createScene(root);
-            localeManager.applyOrientation(scene);
-
-            Stage stage = (Stage) btnLogin.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle(bundle.getString("dashboard.title"));
-            stage.setWidth(1280);
-            stage.setHeight(900);
-            stage.centerOnScreen();
+            Screens.showDashboard((Stage) btnLogin.getScene().getWindow());
             log.info("Dashboard loaded successfully");
-
         } catch (IOException e) {
             log.error("Failed to load dashboard", e);
             lblError.setText(bundle.getString("login.error.ui"));

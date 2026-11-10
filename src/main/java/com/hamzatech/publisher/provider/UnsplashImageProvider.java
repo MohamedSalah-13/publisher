@@ -1,6 +1,7 @@
 package com.hamzatech.publisher.provider;
 
 import com.hamzatech.publisher.service.ConfigService;
+import com.hamzatech.publisher.service.KeyCheck;
 import com.hamzatech.publisher.service.UnsplashService;
 
 import java.io.IOException;
@@ -27,6 +28,21 @@ public class UnsplashImageProvider implements ImageProvider {
     @Override
     public String displayName() {
         return "Unsplash";
+    }
+
+    @Override
+    public String apiKeySetting() {
+        return ConfigService.UNSPLASH_API_KEY;
+    }
+
+    @Override
+    public String apiKeyPage() {
+        return "https://unsplash.com/oauth/applications";
+    }
+
+    @Override
+    public KeyCheck.Result checkKey(String apiKey) {
+        return KeyCheck.unsplash(apiKey);
     }
 
     @Override
