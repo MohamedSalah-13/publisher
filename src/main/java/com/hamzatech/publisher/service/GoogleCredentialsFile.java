@@ -11,6 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * فحص ملف {@code credentials.json} الذي يختاره المستخدم، ونسخه إلى مجلد البيانات.
@@ -75,7 +78,27 @@ public final class GoogleCredentialsFile {
     }
 
     /**
-     * ينسخ الملف إلى مجلد البيانات باسم {@value #FILE_NAME}.
+     * أين يُقرأ الملف؟ أول مكان يوجد فيه بهذا الترتيب: مجلد البيانات، مجلد الـ JAR،
+     * مجلد التشغيل.
+     * <p>
+     * مجلد البيانات أولًا لأنه المكان الوحيد الذي يضع فيه المستخدم ملفًا باختياره
+     * ({@link #install}). كان الأخير في الترتيب، فمن اختار ملفه في معالج الإعداد
+     * وبجانب الـ JAR ملف مضمَّن في المثبّت رأى "قُبل الملف" وظل تسجيل الدخول يستخدم
+     * الملف المضمَّن، ولا سبيل لاستبدال ملف مضمَّن لا يعمل.
+     *
+     * @param jarDir قد يكون {@code null} (تشغيل من IDE بلا JAR)
+     */
+    public static Optional<Path> locate(Path dataDir, Path jarDir, Path workingDir) {
+        return Stream.of(dataDir, jarDir, workingDir)
+                .filter(Objects::nonNull)
+                .map(dir -> dir.resolve(FILE_NAME))
+                .filter(Files::isRegularFile)
+                .findFirst();
+    }
+
+    /**
+     * ينسخ الملف إلى مجلد البيانات باسم {@value #FILE_NAME}، فيصير هو المستخدَم
+     * ({@link #locate}).
      * <p>
      * مجلد البيانات لا مجلد البرنامج: الأخير لا يُكتب فيه دون صلاحيات في النسخة المثبّتة.
      *

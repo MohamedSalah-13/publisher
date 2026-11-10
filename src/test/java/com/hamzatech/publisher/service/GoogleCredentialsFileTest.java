@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GoogleCredentialsFileTest {
 
@@ -83,6 +84,43 @@ class GoogleCredentialsFileTest {
         GoogleCredentialsFile.install(file(DESKTOP_CLIENT));
 
         assertEquals(DESKTOP_CLIENT, Files.readString(installed));
+    }
+
+    private Path folderWithFile(String name) throws IOException {
+        Path folder = Files.createDirectory(dir.resolve(name));
+        Files.writeString(folder.resolve(GoogleCredentialsFile.FILE_NAME), name);
+        return folder;
+    }
+
+    @Test
+    void locate_prefersTheDataDirectoryOverABundledFile() throws IOException {
+        // الملف الذي اختاره المستخدم يجب أن يغلب المضمَّن في المثبّت بجانب الـ JAR
+        Path data = folderWithFile("data");
+        Path jar = folderWithFile("jar");
+        Path working = folderWithFile("working");
+
+        assertEquals(data.resolve(GoogleCredentialsFile.FILE_NAME),
+                GoogleCredentialsFile.locate(data, jar, working).orElseThrow());
+    }
+
+    @Test
+    void locate_fallsBackToTheJarDirectoryThenTheWorkingDirectory() throws IOException {
+        Path emptyData = Files.createDirectory(dir.resolve("data"));
+        Path jar = folderWithFile("jar");
+        Path working = folderWithFile("working");
+
+        assertEquals(jar.resolve(GoogleCredentialsFile.FILE_NAME),
+                GoogleCredentialsFile.locate(emptyData, jar, working).orElseThrow());
+        // jarDir فارغ عند التشغيل من IDE
+        assertEquals(working.resolve(GoogleCredentialsFile.FILE_NAME),
+                GoogleCredentialsFile.locate(emptyData, null, working).orElseThrow());
+    }
+
+    @Test
+    void locate_findsNothingWhenNoFolderHasTheFile() throws IOException {
+        Path empty = Files.createDirectory(dir.resolve("empty"));
+
+        assertTrue(GoogleCredentialsFile.locate(empty, null, empty).isEmpty());
     }
 
     @Test

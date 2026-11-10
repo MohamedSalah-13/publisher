@@ -39,8 +39,8 @@ public class BloggerService {
             "https://www.googleapis.com/auth/userinfo.email"
     );
 
-    // 1) ملف خارجي بجانب الـ JAR (مفضل للتوزيع)
-    private static final String EXTERNAL_CREDENTIALS_FILE_NAME = "credentials.json";
+    // 1) ملف خارجي: في مجلد البيانات، أو بجانب الـ JAR، أو في مجلد التشغيل
+    private static final String EXTERNAL_CREDENTIALS_FILE_NAME = GoogleCredentialsFile.FILE_NAME;
     // 2) fallback: الملف داخل resources (للتوافق مع الوضع القديم)
     private static final String RESOURCE_CREDENTIALS_FILE_PATH = "/client_secret.json";
 
@@ -51,6 +51,10 @@ public class BloggerService {
     }
 
     private volatile Blogger bloggerClient;
+
+    /** مستقبِل تسجيل الدخول الجاري في المتصفح، إن وُجد؛ إيقافه هو طريقة إلغائه الوحيدة. */
+    private final java.util.concurrent.atomic.AtomicReference<LocalServerReceiver> pendingLogin =
+            new java.util.concurrent.atomic.AtomicReference<>();
 
     private BloggerService() {
         log.info("Initializing BloggerService");
@@ -194,76 +198,112 @@ public class BloggerService {
         }
     }
 
-    private synchronized void ensureClientInitialized(boolean interactive) throws GeneralSecurityException, IOException {
+    private void ensureClientInitialized(boolean interactive) throws GeneralSecurityException, IOException {
         if (bloggerClient != null) {
             return;
         }
+        if (interactive) {
+            authorizeInBrowser();
+        } else {
+            loadStoredCredential();
+        }
+    }
 
+    /** جلسة محفوظة من تشغيل سابق، إن وُجدت. سريع ولا ينتظر المستخدم. */
+    private synchronized void loadStoredCredential() throws GeneralSecurityException, IOException {
+        if (bloggerClient != null) {
+            return;
+        }
         final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-
-        try (InputStream in = openCredentialsStream()) {
-            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                    httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
-                    .setDataStoreFactory(new FileDataStoreFactory(tokensDirectory()))
-                    .setAccessType("offline")
-                    .build();
-
-            Credential credential;
-            if (interactive) {
-                LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-                credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-            } else {
-                credential = flow.loadCredential("user");
-            }
-
-            if (credential == null) {
-                return;
-            }
-
-            this.bloggerClient = new Blogger.Builder(httpTransport, JSON_FACTORY, credential)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
+        Credential credential = newFlow(httpTransport).loadCredential("user");
+        if (credential != null) {
+            this.bloggerClient = newClient(httpTransport, credential);
         }
     }
 
     /**
-     * يفتح ملف OAuth credentials من:
-     * 1) نفس مجلد الـ JAR (مفضل)
-     * 2) أو مجلد التشغيل (user.dir)
-     * 3) أو مجلد بيانات المستخدم ({@link AppPaths#dataDir()})
-     * 4) أو fallback من resources: /client_secret.json
+     * تسجيل الدخول عبر المتصفح.
+     * <p>
+     * غير {@code synchronized} عمدًا: الانتظار هنا بلا مهلة حتى يكمل المستخدم الدخول
+     * في المتصفح، وكان يجري وقفل الخدمة ممسوك، فمن ترك المتصفح ودخل اللوحة علّق
+     * كل نداء آخر ({@code getMyBlogs}) خلف هذا القفل إلى الأبد.
+     */
+    private void authorizeInBrowser() throws GeneralSecurityException, IOException {
+        final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        GoogleAuthorizationCodeFlow flow = newFlow(httpTransport);
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        // محاولة سابقة متروكة ما زالت تحجز المنفذ 8888؛ تُلغى لتبدأ هذه
+        stopQuietly(pendingLogin.getAndSet(receiver));
+        try {
+            Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+            synchronized (this) {
+                this.bloggerClient = newClient(httpTransport, credential);
+            }
+        } catch (IOException | RuntimeException e) {
+            // إيقاف المستقبِل يُرجع الانتظار بلا رمز، فيفشل طلب التوكن بخطأ لا يفهمه
+            // المستخدم؛ السبب الحقيقي أن المحاولة أُلغيت
+            if (pendingLogin.get() != receiver) {
+                throw new IOException("Google sign-in was cancelled.", e);
+            }
+            throw e;
+        } finally {
+            pendingLogin.compareAndSet(receiver, null);
+        }
+    }
+
+    /**
+     * يلغي تسجيل دخول ينتظر المتصفح، إن وُجد. يُستدعى عند مغادرة الشاشة التي بدأته.
+     */
+    public void cancelLogin() {
+        LocalServerReceiver receiver = pendingLogin.getAndSet(null);
+        if (receiver != null) {
+            log.info("Cancelling the pending Google sign-in");
+            stopQuietly(receiver);
+        }
+    }
+
+    private static void stopQuietly(LocalServerReceiver receiver) {
+        if (receiver == null) {
+            return;
+        }
+        try {
+            receiver.stop();
+        } catch (IOException | RuntimeException e) {
+            log.debug("Stopping the OAuth receiver failed", e);
+        }
+    }
+
+    private GoogleAuthorizationCodeFlow newFlow(NetHttpTransport httpTransport) throws IOException {
+        try (InputStream in = openCredentialsStream()) {
+            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+            return new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
+                    .setDataStoreFactory(new FileDataStoreFactory(tokensDirectory()))
+                    .setAccessType("offline")
+                    .build();
+        }
+    }
+
+    private static Blogger newClient(NetHttpTransport httpTransport, Credential credential) {
+        return new Blogger.Builder(httpTransport, JSON_FACTORY, credential)
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+    }
+
+    /**
+     * يفتح ملف OAuth credentials من أول مكان يوجد فيه، بترتيب
+     * {@link GoogleCredentialsFile#locate}: مجلد بيانات المستخدم، ثم مجلد الـ JAR،
+     * ثم مجلد التشغيل؛ وإن لم يوجد فمن resources ({@code /client_secret.json}).
      */
     private InputStream openCredentialsStream() throws IOException {
-        // 1) بجانب ملف الـ JAR
-        Path jarDir = getJarDirectoryOrNull();
-        if (jarDir != null) {
-            Path p = jarDir.resolve(EXTERNAL_CREDENTIALS_FILE_NAME);
-            if (Files.exists(p)) {
-                log.info("Loading OAuth credentials from JAR directory: {}", p.toAbsolutePath());
-                return Files.newInputStream(p);
-            }
+        // dataDir() لا dataFile(): الأخير ينقل الملف من مجلد التشغيل، وهو هنا مُدخل لا بيانات
+        Optional<Path> external = GoogleCredentialsFile.locate(
+                AppPaths.dataDir(), getJarDirectoryOrNull(), Path.of(System.getProperty("user.dir", ".")));
+        if (external.isPresent()) {
+            log.info("Loading OAuth credentials from: {}", external.get().toAbsolutePath());
+            return Files.newInputStream(external.get());
         }
 
-        // 2) مجلد التشغيل
-        Path workingDir = Path.of(System.getProperty("user.dir", "."));
-        Path p2 = workingDir.resolve(EXTERNAL_CREDENTIALS_FILE_NAME);
-        if (Files.exists(p2)) {
-            log.info("Loading OAuth credentials from working directory: {}", p2.toAbsolutePath());
-            return Files.newInputStream(p2);
-        }
-
-        // 3) مجلد بيانات المستخدم: في النسخة المثبّتة مجلد الـ JAR داخل مجلد البرنامج
-        // ولا يُكتب فيه دون صلاحيات، أما هذا فيملكه المستخدم دائمًا. dataDir() لا
-        // dataFile(): الأخير ينقل الملف من مجلد التشغيل، وهو هنا مُدخل لا بيانات
-        Path p3 = AppPaths.dataDir().resolve(EXTERNAL_CREDENTIALS_FILE_NAME);
-        if (Files.exists(p3)) {
-            log.info("Loading OAuth credentials from the data directory: {}", p3.toAbsolutePath());
-            return Files.newInputStream(p3);
-        }
-
-        // 4) fallback: resources
+        // fallback: resources
         InputStream in = BloggerService.class.getResourceAsStream(RESOURCE_CREDENTIALS_FILE_PATH);
         if (in != null) {
             log.info("Loading OAuth credentials from resources: {}", RESOURCE_CREDENTIALS_FILE_PATH);
@@ -271,8 +311,8 @@ public class BloggerService {
         }
 
         throw new FileNotFoundException(
-                "OAuth credentials not found. Place '" + EXTERNAL_CREDENTIALS_FILE_NAME + "' next to the JAR (preferred) "
-                        + "or in the working directory or the app data directory, or include '" + RESOURCE_CREDENTIALS_FILE_PATH + "' in resources."
+                "OAuth credentials not found. Place '" + EXTERNAL_CREDENTIALS_FILE_NAME + "' in the app data directory, "
+                        + "next to the JAR or in the working directory, or include '" + RESOURCE_CREDENTIALS_FILE_PATH + "' in resources."
         );
     }
 

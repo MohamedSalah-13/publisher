@@ -10,6 +10,7 @@ import com.hamzatech.publisher.service.GoogleCredentialsFile;
 import com.hamzatech.publisher.service.KeyCheck;
 import com.hamzatech.publisher.service.WordPressService;
 import com.hamzatech.publisher.service.WordPressSiteService;
+import com.hamzatech.publisher.util.AppPaths;
 import com.hamzatech.publisher.util.LocaleManager;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -40,6 +41,8 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -185,6 +188,10 @@ final class SetupWizard {
 
     private void finish() {
         try {
+            // دخول Google بدأ ثم تُرك في المتصفح لا ينتهي من تلقاء نفسه
+            if (!targetStep.googleConnected) {
+                targetStep.cancelPendingSignIn();
+            }
             FirstRun.markCompleted();
             // بلا وجهة نشر لا شيء يُفعل في اللوحة؛ شاشة الدخول تعرض الخيارين من جديد
             boolean hasTarget = targetStep.googleConnected
@@ -597,6 +604,8 @@ final class SetupWizard {
         private final Button btnSignIn = iconButton("", "fth-log-in");
         private final Label lblGoogle = statusLabel();
         boolean googleConnected;
+        /** لا تُلمس خدمة Blogger عند الخروج إن لم يُضغط زر الدخول أصلًا. */
+        private boolean signInStarted;
 
         TargetStep() {
             super("setup.target.title", "setup.target.description");
@@ -732,7 +741,7 @@ final class SetupWizard {
                 case UNREADABLE -> status(lblCredentials, Tone.FAILURE, bundle.getString("setup.blogger.file.unreadable"));
                 case OK -> {
                     try {
-                        GoogleCredentialsFile.install(chosen.toPath());
+                        installCredentials(chosen.toPath());
                         refreshCredentials(bundle.getString("setup.blogger.file.installed"));
                     } catch (IOException | RuntimeException e) {
                         log.error("Could not copy the chosen credentials file", e);
@@ -742,7 +751,34 @@ final class SetupWizard {
             }
         }
 
+        /**
+         * الملف المختار يصير هو المستخدَم ({@link GoogleCredentialsFile#locate}). إن
+         * اختلف عن المحفوظ فالجلسة السابقة صدرت لعميل OAuth آخر ولا تصلح مع هذا،
+         * فتُمسح ليبدأ دخول جديد بدل فشل غامض عند أول نداء.
+         */
+        private void installCredentials(Path chosen) throws IOException {
+            Path current = AppPaths.dataDir().resolve(GoogleCredentialsFile.FILE_NAME);
+            boolean unchanged = Files.isRegularFile(current) && Files.mismatch(chosen, current) == -1;
+            GoogleCredentialsFile.install(chosen);
+            if (!unchanged) {
+                BloggerService blogger = BloggerService.getInstance();
+                blogger.cancelLogin();
+                blogger.clearCredentials();
+                googleConnected = false;
+                signInStarted = false;
+                lblGoogle.setGraphic(null);
+                lblGoogle.setText("");
+            }
+        }
+
+        void cancelPendingSignIn() {
+            if (signInStarted) {
+                BloggerService.getInstance().cancelLogin();
+            }
+        }
+
         private void signIn() {
+            signInStarted = true;
             status(lblGoogle, Tone.INFO, bundle.getString("setup.blogger.signing"));
             btnSignIn.setDisable(true);
             runInBackground("setup-google-login", false, () -> {

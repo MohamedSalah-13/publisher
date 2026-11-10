@@ -135,6 +135,8 @@ public class LoginController {
     @FXML
     public void handleContinueWithoutGoogle() {
         log.info("User continued without signing in to Google");
+        // دخول بدأ ثم تُرك في المتصفح يبقى منتظرًا بلا مهلة ويحجز منفذ الاستقبال
+        bloggerService.cancelLogin();
         loadDashboard();
     }
 
