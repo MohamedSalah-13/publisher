@@ -32,7 +32,9 @@ Download the installer from the [Releases](https://github.com/MohamedSalah-13/pu
 
 ## Setup
 
-All keys are entered once in the in-app **Settings** screen.
+On first launch a **setup wizard** walks you through three steps: a content provider key, an image key, and where to publish. Each key is checked with its provider before it is saved, and every step can be skipped. Publishing to WordPress needs no Google account at all.
+
+Everything in the wizard can be changed later in the **Settings** screen, and the wizard can be reopened from the sign-in screen.
 
 | What you need | When | Where to get it |
 |---|---|---|

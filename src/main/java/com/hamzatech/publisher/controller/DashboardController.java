@@ -334,6 +334,11 @@ public class DashboardController {
     }
 
     private void loadBlogs() {
+        // مواقع ووردبريس محلية فتُعرض فورًا، ولا تنتظر نداء Blogger: قد يتأخر أو
+        // لا يعود أبدًا (شبكة معلّقة)، ومن ينشر على ووردبريس وحده لا شأن له به
+        allTargets = new ArrayList<>(loadWordPressTargets());
+        filterBlogsByCategory();
+
         Task<List<Blog>> task = new Task<>() {
             @Override
             protected List<Blog> call() throws Exception {

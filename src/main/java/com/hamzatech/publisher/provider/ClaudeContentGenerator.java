@@ -2,6 +2,7 @@ package com.hamzatech.publisher.provider;
 
 import com.hamzatech.publisher.service.ClaudeService;
 import com.hamzatech.publisher.service.ConfigService;
+import com.hamzatech.publisher.service.KeyCheck;
 
 import java.io.IOException;
 
@@ -26,6 +27,21 @@ public class ClaudeContentGenerator implements ContentGenerator {
     @Override
     public String displayName() {
         return "Claude (Anthropic)";
+    }
+
+    @Override
+    public String apiKeySetting() {
+        return ConfigService.CLAUDE_API_KEY;
+    }
+
+    @Override
+    public String apiKeyPage() {
+        return "https://console.anthropic.com/settings/keys";
+    }
+
+    @Override
+    public KeyCheck.Result checkKey(String apiKey) {
+        return KeyCheck.claude(apiKey);
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.io.IOException;
  * فإضافة مزود ثالث تعني تعديل كلاس قائم. الآن المزود كلاس يحقق هذه الواجهة
  * ويُسجَّل في {@link ProviderRegistry}.
  */
-public interface ContentGenerator {
+public interface ContentGenerator extends KeyedProvider {
 
     /** المعرّف المخزَّن في الإعدادات، مثل {@code "openai"}. */
     String id();
