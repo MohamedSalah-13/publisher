@@ -1,0 +1,204 @@
+/* =======================================
+   Hamza Publisher - Stylesheet
+   ======================================= */
+
+/* عام */
+.root {
+    -fx-font-family: "Segoe UI", "Tahoma", "Arial";
+    -fx-font-size: 13px;
+}
+
+/* شريط الأدوات العلوي/السفلي */
+.app-toolbar {
+    -fx-background-color: -color-bg-subtle;
+    -fx-padding: 12;
+    -fx-border-color: transparent transparent -color-border-default transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* منطقة المحتوى */
+.content-area {
+    -fx-padding: 20;
+}
+
+/* بطاقة سطح عامة (بديل عن الخلفية البيضاء الثابتة) */
+.surface-card {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 15px;
+}
+
+/* لوحة داخلية فاتحة */
+.inset-panel {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 5px;
+    -fx-padding: 10px;
+}
+
+/* لوحة تلميحات */
+.hint-panel {
+    -fx-background-color: -color-accent-subtle;
+    -fx-background-radius: 6px;
+    -fx-padding: 15px;
+}
+
+/* بطاقات الأقسام */
+.category-card {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px 20px;
+    -fx-min-width: 120px;
+    -fx-max-width: 150px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 5, 0, 0, 2);
+}
+
+.category-card:hover {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-accent-emphasis;
+    -fx-effect: dropshadow(gaussian, -color-accent-muted, 8, 0, 0, 3);
+}
+
+.category-card-selected {
+    -fx-background-color: -color-accent-subtle !important;
+    -fx-border-color: -color-accent-emphasis !important;
+    -fx-border-width: 2px !important;
+    -fx-effect: dropshadow(gaussian, -color-accent-muted, 10, 0, 0, 3);
+}
+
+.category-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-default;
+}
+
+.category-count {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+/* الأزرار */
+.button {
+    -fx-cursor: hand;
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* RadioButton */
+.radio-button {
+    -fx-cursor: hand;
+}
+
+/* =======================================
+   مقياس المسافات: مضاعفات 8
+   ======================================= */
+
+/* فاصل قبل مجموعة حقول جديدة داخل بطاقة */
+.field-group {
+    -fx-padding: 8 0 0 0;
+}
+
+/* صف الأزرار أسفل بطاقة */
+.card-actions {
+    -fx-padding: 16 0 0 0;
+}
+
+/* شبكة بطاقات الأقسام في اللوحة */
+.category-flow {
+    -fx-padding: 8;
+}
+
+/* =======================================
+   شاشة الدخول (كانت في style.css منفصل)
+   ======================================= */
+
+.root-pane {
+    -fx-background-color: -color-bg-subtle;
+}
+
+.login-card {
+    -fx-background-color: -color-bg-default;
+    -fx-padding: 40;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.app-icon {
+    -fx-icon-color: -color-accent-emphasis;
+}
+
+.app-title {
+    -fx-text-fill: -color-accent-emphasis;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.google-btn {
+    -fx-background-color: -color-bg-default;
+    -fx-text-fill: -color-fg-default;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-min-width: 200px;
+}
+
+.google-btn:hover {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-accent-muted;
+    -fx-effect: dropshadow(three-pass-box, rgba(60,64,67,0.3), 2, 0, 0, 1);
+}
+
+.google-btn:pressed {
+    -fx-background-color: -color-accent-subtle;
+}
+
+/* خلفية النافذة الرئيسية من السمة، لا من Scene.fill — انظر AppWindow.createScene */
+.app-shell { -fx-background-color: -color-bg-default; }
+
+/* JavaFX 25 native window header */
+.window-header {
+    -fx-background-color: -color-bg-subtle;
+    -fx-pref-height: 60px;
+    -fx-border-color: transparent transparent -color-border-default transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.window-header .app-toolbar {
+    -fx-padding: 8 16;
+    -fx-border-width: 0;
+}
+.window-brand { -fx-padding: 8 20; }
+.publisher-dashboard { -fx-background-color: -color-bg-subtle; }
+.workspace-tabs > .tab-header-area > .tab-header-background { -fx-background-color: -color-bg-subtle; }
+.workspace-tabs > .tab-header-area { -fx-padding: 8 20 0 20; }
+.workspace-tabs .tab { -fx-padding: 8 18; }
+.overview-content { -fx-padding: 24; -fx-background-color: -color-bg-subtle; }
+.overview-content .surface-card { -fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 18; }
+.metric-card { -fx-min-width: 220; -fx-max-width: Infinity; }
+.metric-value { -fx-font-size: 30px; -fx-font-weight: bold; }
+.rate-value { -fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis; }
+.status-success { -fx-text-fill: -color-success-fg; -fx-icon-color: -color-success-fg; }
+.status-failure { -fx-text-fill: -color-danger-fg; -fx-icon-color: -color-danger-fg; }
+.activity-chart { -fx-padding: 0; }
+.activity-chart .default-color0.chart-bar { -fx-bar-fill: -color-success-emphasis; }
+.activity-chart .default-color1.chart-bar { -fx-bar-fill: -color-danger-emphasis; }
+.activity-chart .default-color0.chart-legend-item-symbol { -fx-background-color: -color-success-emphasis; }
+.activity-chart .default-color1.chart-legend-item-symbol { -fx-background-color: -color-danger-emphasis; }
+.activity-chart .chart-plot-background { -fx-background-color: transparent; }
+.activity-chart .chart-vertical-grid-lines { -fx-stroke: transparent; }
+.overview-content .table-view { -fx-border-width: 0; }

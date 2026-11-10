@@ -1,0 +1,113 @@
+# Builds the Windows installer and publishes a GitHub Release whenever a version tag is pushed.
+#
+#   git tag v1.1.0 && git push origin v1.1.0
+#
+# The tag must match the version in pom.xml (v1.1.0 <-> 1.1.0), otherwise the installer would
+# carry a different version than its release and Windows upgrades would go wrong.
+#
+# Optional secret GOOGLE_CREDENTIALS_JSON: the content of credentials.json (Google OAuth Desktop
+# client). When set, it is bundled so Blogger sign-in works right after installing; when unset,
+# the installer is built without it and users place their own file in %LOCALAPPDATA%\HamzaPublisher.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)build, e.g. v1.1.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  installer:
+    runs-on: windows-2022
+    timeout-minutes: 40
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Check the tag matches pom.xml
+        shell: pwsh
+        run: |
+          [xml]$pom = Get-Content pom.xml
+          $version = $pom.project.version
+          if ("v$version" -ne $env:TAG) {
+            throw "Tag $env:TAG does not match pom.xml version $version. Set <version>$($env:TAG.TrimStart('v'))</version> first."
+          }
+          Write-Host "Releasing $version"
+
+      - name: Run tests
+        run: ./mvnw.cmd -B test
+
+      # The script looks for WiX in %USERPROFILE%\.tools\wix314. Downloading it pins the exact
+      # version instead of depending on what the runner image happens to ship.
+      - name: Install WiX 3.14
+        shell: pwsh
+        run: |
+          $dir = Join-Path $env:USERPROFILE '.tools\wix314'
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          Invoke-WebRequest -Uri 'https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip' -OutFile "$env:RUNNER_TEMP\wix.zip"
+          Expand-Archive "$env:RUNNER_TEMP\wix.zip" -DestinationPath $dir -Force
+
+      - name: Write credentials.json
+        shell: pwsh
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: |
+          if ($env:GOOGLE_CREDENTIALS_JSON) {
+            Set-Content -Path credentials.json -Value $env:GOOGLE_CREDENTIALS_JSON -Encoding utf8NoBOM
+            Write-Host 'credentials.json will be bundled.'
+          } else {
+            Write-Host '::warning::GOOGLE_CREDENTIALS_JSON is not set; the installer will not include credentials.json.'
+          }
+
+      - name: Build installer
+        shell: pwsh
+        run: ./packaging/build-installer.ps1 -Type exe
+
+      - name: Build portable zip
+        shell: pwsh
+        run: |
+          Move-Item target/installer/*.exe $env:RUNNER_TEMP
+          ./packaging/build-installer.ps1 -Type app-image -SkipBuild
+          Move-Item "$env:RUNNER_TEMP/*.exe" target/installer/
+
+      - name: Remove credentials.json
+        if: always()
+        shell: pwsh
+        run: Remove-Item credentials.json -ErrorAction SilentlyContinue
+
+      - name: Publish the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $files = Get-ChildItem target/installer -File | Where-Object { $_.Extension -in '.exe', '.zip' } | ForEach-Object { $_.FullName }
+          gh release view $env:TAG *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:TAG @files --clobber
+          } else {
+            gh release create $env:TAG @files --title "Hamza Publisher $($env:TAG.TrimStart('v'))" --generate-notes
+          }
+
+      - name: Keep the installer as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ env.TAG }}
+          path: |
+            target/installer/*.exe
+            target/installer/*.zip
+          retention-days: 30

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hamzatech.publisher.controller.OverviewController" styleClass="overview-scroll">
+    <content>
+        <VBox spacing="20" styleClass="overview-content">
+            <HBox spacing="16" alignment="CENTER_LEFT">
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="%overview.title" styleClass="title-2"/>
+                    <Label text="%overview.subtitle" styleClass="text-muted" wrapText="true"/>
+                </VBox>
+                <Button onAction="#handleNewBatch" text="%overview.new.batch" styleClass="accent">
+                    <graphic><FontIcon iconLiteral="fth-plus"/></graphic>
+                </Button>
+            </HBox>
+            <FlowPane hgap="12" vgap="8" alignment="CENTER_LEFT">
+                <Label text="%overview.period.label" styleClass="text-muted"/>
+                <ComboBox fx:id="periodFilter" prefWidth="155"/>
+                <ComboBox fx:id="targetFilter" prefWidth="240"/>
+                <Button fx:id="refreshButton" onAction="#refresh" text="%overview.refresh" styleClass="button-outlined">
+                    <graphic><FontIcon iconLiteral="fth-refresh-cw"/></graphic>
+                </Button>
+                <Label fx:id="updatedLabel" text="%overview.loading" styleClass="text-muted, text-small"/>
+            </FlowPane>
+            <TilePane fx:id="metricsTiles" hgap="16" vgap="16" prefColumns="4" prefTileWidth="260" prefTileHeight="132" tileAlignment="TOP_LEFT">
+                <VBox spacing="10" styleClass="surface-card, metric-card">
+                    <HBox spacing="10" alignment="CENTER_LEFT"><FontIcon iconLiteral="fth-file-text" styleClass="accent"/><Label text="%overview.total" styleClass="text-muted"/></HBox>
+                    <Label fx:id="totalValue" text="0" styleClass="metric-value"/>
+                    <Label text="%overview.total.hint" styleClass="text-muted, text-small"/>
+                </VBox>
+                <VBox spacing="10" styleClass="surface-card, metric-card">
+                    <HBox spacing="10" alignment="CENTER_LEFT"><FontIcon iconLiteral="fth-check-circle" styleClass="status-success"/><Label text="%overview.success" styleClass="text-muted"/></HBox>
+                    <Label fx:id="successValue" text="0" styleClass="metric-value, status-success"/>
+                    <Label text="%overview.success.hint" styleClass="text-muted, text-small"/>
+                </VBox>
+                <VBox spacing="10" styleClass="surface-card, metric-card">
+                    <HBox spacing="10" alignment="CENTER_LEFT"><FontIcon iconLiteral="fth-alert-circle" styleClass="status-failure"/><Label text="%overview.failure" styleClass="text-muted"/></HBox>
+                    <Label fx:id="failureValue" text="0" styleClass="metric-value, status-failure"/>
+                    <Label text="%overview.failure.hint" styleClass="text-muted, text-small"/>
+                </VBox>
+                <VBox spacing="10" styleClass="surface-card, metric-card">
+                    <HBox spacing="10" alignment="CENTER_LEFT"><FontIcon iconLiteral="fth-clock" styleClass="accent"/><Label text="%overview.pending" styleClass="text-muted"/></HBox>
+                    <Label fx:id="pendingValue" text="0" styleClass="metric-value"/>
+                    <Label text="%overview.pending.hint" styleClass="text-muted, text-small"/>
+                </VBox>
+            </TilePane>
+            <HBox spacing="20" alignment="TOP_LEFT">
+                <VBox spacing="10" styleClass="surface-card" HBox.hgrow="ALWAYS" minWidth="450">
+                    <HBox spacing="12" alignment="CENTER_LEFT"><Label text="%overview.activity" styleClass="title-4"/><HBox HBox.hgrow="ALWAYS"/><Label fx:id="chartPeriodLabel" styleClass="text-muted, text-small"/></HBox>
+                    <BarChart fx:id="activityChart" animated="false" prefHeight="230" minHeight="230" maxHeight="230" categoryGap="10" barGap="2" styleClass="activity-chart">
+                        <xAxis><CategoryAxis tickLabelRotation="-30"/></xAxis>
+                        <yAxis><NumberAxis forceZeroInRange="true"/></yAxis>
+                    </BarChart>
+                </VBox>
+                <VBox spacing="16" prefWidth="278" minWidth="278" maxWidth="278" styleClass="surface-card, performance-card">
+                    <Label text="%overview.performance" styleClass="title-4"/>
+                    <Label fx:id="rateValue" text="—" styleClass="rate-value"/>
+                    <Label text="%overview.rate.hint" styleClass="text-muted, text-small" wrapText="true"/>
+                    <ProgressBar fx:id="successProgress" progress="0" maxWidth="Infinity" styleClass="success"/>
+                    <Label fx:id="insightsLabel" text="%overview.insight.empty" wrapText="true" styleClass="text-muted"/>
+                    <Button onAction="#handleLogs" text="%overview.review.logs" styleClass="button-outlined" maxWidth="Infinity">
+                        <graphic><FontIcon iconLiteral="fth-arrow-up-right"/></graphic>
+                    </Button>
+                </VBox>
+            </HBox>
+            <HBox spacing="20" alignment="TOP_LEFT">
+                <VBox spacing="12" styleClass="surface-card" HBox.hgrow="ALWAYS" minWidth="450">
+                    <HBox alignment="CENTER_LEFT"><Label text="%overview.recent" styleClass="title-4"/><HBox HBox.hgrow="ALWAYS"/><Button onAction="#handleLogs" text="%overview.view.all" styleClass="flat"/></HBox>
+                    <TableView fx:id="recentTable" prefHeight="214" minHeight="214" maxHeight="214">
+                        <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+                        <columns>
+                            <TableColumn fx:id="titleColumn" text="%overview.column.title" prefWidth="290" minWidth="160"/>
+                            <TableColumn fx:id="targetColumn" text="%overview.column.target" prefWidth="155" minWidth="90"/>
+                            <TableColumn fx:id="statusColumn" text="%overview.column.status" prefWidth="95" minWidth="80"/>
+                            <TableColumn fx:id="dateColumn" text="%overview.column.date" prefWidth="110" minWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+                <VBox spacing="16" prefWidth="278" minWidth="278" maxWidth="278" styleClass="surface-card">
+                    <Label text="%overview.workspace" styleClass="title-4"/>
+                    <HBox alignment="CENTER_LEFT"><Label text="%overview.active.targets" styleClass="text-muted"/><HBox HBox.hgrow="ALWAYS"/><Label fx:id="activeTargetsValue" text="0" styleClass="title-4"/></HBox>
+                    <Separator/>
+                    <VBox spacing="6"><Label text="%overview.provider" styleClass="text-muted, text-small"/><Label fx:id="providerValue" text="—" styleClass="title-4"/></VBox>
+                    <VBox spacing="6"><Label text="%overview.image.provider" styleClass="text-muted, text-small"/><Label fx:id="imageProviderValue" text="—" styleClass="title-4"/></VBox>
+                    <Button onAction="#handleQueue" text="%overview.open.queue" styleClass="button-outlined" maxWidth="Infinity"><graphic><FontIcon iconLiteral="fth-clock"/></graphic></Button>
+                </VBox>
+            </HBox>
+        </VBox>
+    </content>
+</ScrollPane>

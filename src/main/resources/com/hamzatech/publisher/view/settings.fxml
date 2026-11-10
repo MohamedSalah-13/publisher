@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import atlantafx.base.controls.PasswordTextField?>
+<?import atlantafx.base.controls.ToggleSwitch?>
+
+<BorderPane prefHeight="500.0" prefWidth="600.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hamzatech.publisher.controller.SettingsController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="app-toolbar">
+            <FontIcon iconLiteral="fth-settings" iconSize="18" styleClass="accent"/>
+            <Label text="%settings.title" styleClass="accent, title-4">
+                <font>
+                    <Font name="System Bold" size="20.0" />
+                </font>
+            </Label>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true">
+            <VBox spacing="20.0" styleClass="content-area">
+
+                <!-- قسم المظهر -->
+                <VBox spacing="10.0" styleClass="surface-card">
+                    <Label text="%settings.appearance" styleClass="title-4" graphicTextGap="8">
+                        <graphic><FontIcon iconLiteral="fth-monitor" iconSize="18" styleClass="accent"/></graphic>
+                        <font><Font name="System Bold" size="16.0" /></font>
+                    </Label>
+                    <Separator />
+                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <FontIcon iconLiteral="fth-moon"/>
+                        <Label text="%settings.dark.mode" />
+                        <HBox HBox.hgrow="ALWAYS" />
+                        <ToggleSwitch fx:id="toggleDarkMode" />
+                    </HBox>
+                </VBox>
+
+                <!-- قسم الذكاء الاصطناعي -->
+                <VBox spacing="10.0" styleClass="surface-card">
+                    <Label text="%setting.text.artificial.intelligence" styleClass="title-4" graphicTextGap="8">
+                        <graphic><FontIcon iconLiteral="fth-cpu" iconSize="18" styleClass="accent"/></graphic>
+                        <font><Font name="System Bold" size="16.0" /></font>
+                    </Label>
+                    <Separator />
+
+                    <Label text="%settings.ai.service" />
+                    <HBox spacing="15.0">
+                        <RadioButton fx:id="rbOpenAI" selected="true" text="ChatGPT (OpenAI)">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="aiProvider" />
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="rbGemini" text="Gemini (Google)" toggleGroup="$aiProvider" />
+                        <RadioButton fx:id="rbClaude" text="Claude (Anthropic)" toggleGroup="$aiProvider" />
+                    </HBox>
+
+                    <Label styleClass="field-group" text="%settings.openai.key" />
+                    <PasswordTextField fx:id="txtOpenAIKey" promptText="sk-..." />
+                    <Label text="%settings.openai.model" />
+                    <TextField fx:id="txtOpenAIModel" />
+
+                    <Label styleClass="field-group" text="%settings.gemini.key" />
+                    <PasswordTextField fx:id="txtGeminiKey" promptText="AIza..." />
+                    <Label text="%settings.gemini.model" />
+                    <TextField fx:id="txtGeminiModel" promptText="%settings.gemini.model.auto" />
+
+                    <Label styleClass="field-group" text="%settings.claude.key" />
+                    <PasswordTextField fx:id="txtClaudeKey" promptText="sk-ant-..." />
+                    <Label text="%settings.claude.model" />
+                    <TextField fx:id="txtClaudeModel" />
+
+                    <Label styleClass="text-muted, text-small" text="%settings.model.hint" wrapText="true" />
+                </VBox>
+
+                <!-- قسم كتابة المقال -->
+                <VBox spacing="10.0" styleClass="surface-card">
+                    <Label text="%settings.article" styleClass="title-4" graphicTextGap="8">
+                        <graphic><FontIcon iconLiteral="fth-edit-3" iconSize="18" styleClass="accent"/></graphic>
+                        <font><Font name="System Bold" size="16.0" /></font>
+                    </Label>
+                    <Separator />
+
+                    <Label text="%settings.article.length" />
+                    <ComboBox fx:id="cmbArticleLength" maxWidth="Infinity" />
+
+                    <CheckBox fx:id="chkArticleFaq" styleClass="field-group" text="%settings.article.faq" />
+
+                    <CheckBox fx:id="chkSeoAi" styleClass="field-group" text="%settings.seo.ai" />
+                    <Label styleClass="text-muted, text-small" text="%settings.seo.ai.hint" wrapText="true" />
+
+                    <CheckBox fx:id="chkQualityCheck" styleClass="field-group" text="%settings.quality.check" />
+                    <Label styleClass="text-muted, text-small" text="%settings.quality.check.hint" wrapText="true" />
+
+                    <CheckBox fx:id="chkInternalLinks" styleClass="field-group" text="%settings.internal.links" />
+                    <Label styleClass="text-muted, text-small" text="%settings.internal.links.hint" wrapText="true" />
+
+                    <Label styleClass="field-group" text="%settings.article.instructions" />
+                    <TextArea fx:id="txtArticleInstructions" prefRowCount="3" wrapText="true"
+                              promptText="%settings.article.instructions.prompt" />
+                </VBox>
+
+                <!-- قسم الصور -->
+                <VBox spacing="10.0" styleClass="surface-card">
+                    <Label text="%setting.image" styleClass="title-4" graphicTextGap="8">
+                        <graphic><FontIcon iconLiteral="fth-image" iconSize="18" styleClass="accent"/></graphic>
+                        <font><Font name="System Bold" size="16.0" /></font>
+                    </Label>
+                    <Separator />
+
+                    <Label text="%setting.choose.image.resource" />
+                    <HBox spacing="15.0">
+                        <RadioButton fx:id="rbUnsplash" selected="true" text="%setting.unsplash.free">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="imageProvider" />
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="rbDallE" text="%settings.image.openai" toggleGroup="$imageProvider" />
+                    </HBox>
+
+                    <Label styleClass="field-group" text="%settings.unsplash.key" />
+                    <PasswordTextField fx:id="txtUnsplashKey" promptText="..." />
+
+                    <Label styleClass="text-muted, text-small" text="%setting.openai.notes" />
+
+                    <Label styleClass="field-group" text="%settings.image.model" />
+                    <TextField fx:id="txtImageModel" />
+                    <Label text="%settings.image.quality" />
+                    <ComboBox fx:id="cmbImageQuality" maxWidth="Infinity" />
+                    <Label styleClass="text-muted, text-small" text="%settings.image.quality.hint" wrapText="true" />
+                    <Label styleClass="text-muted, text-small" text="%settings.image.blogger.hint" wrapText="true" />
+                </VBox>
+
+                <!-- قسم النشر -->
+                <VBox spacing="10.0" styleClass="surface-card">
+                    <Label text="%settings.publish.settings" styleClass="title-4" graphicTextGap="8">
+                        <graphic><FontIcon iconLiteral="fth-send" iconSize="18" styleClass="accent"/></graphic>
+                        <font><Font name="System Bold" size="16.0" /></font>
+                    </Label>
+                    <Separator />
+
+                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Label text="%settings.publish.delay" />
+                        <Label fx:id="lblDelayValue" styleClass="text-bold, accent" />
+                    </HBox>
+                    <Slider fx:id="sliderDelay" min="5" max="300" value="5" majorTickUnit="50" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="false" blockIncrement="5" />
+                    <Label styleClass="text-muted, text-small" text="%settings.publish.delay.hint" />
+
+                    <CheckBox fx:id="chkPublishAsDraft" styleClass="field-group" text="%settings.post.draft" />
+                    <Label styleClass="text-muted, text-small" text="%settings.post.draft.hint" wrapText="true" />
+
+                    <CheckBox fx:id="chkSkipDuplicates" styleClass="field-group" text="%settings.skip.duplicates" />
+                    <Label styleClass="text-muted, text-small" text="%settings.skip.duplicates.hint" wrapText="true" />
+
+                    <Label styleClass="field-group" text="%settings.title.language" />
+                    <HBox spacing="15.0">
+                        <RadioButton fx:id="rbTitleArabic" selected="true" text="%settings.language.arabic">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="titleLanguageGroup" />
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="rbTitleEnglish" text="%settings.language.english" toggleGroup="$titleLanguageGroup" />
+                    </HBox>
+
+                    <Label styleClass="field-group" text="%settings.content.language" />
+                    <HBox spacing="15.0">
+                        <RadioButton fx:id="rbContentArabic" selected="true" text="%settings.language.arabic">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="contentLanguageGroup" />
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="rbContentEnglish" text="%settings.language.english" toggleGroup="$contentLanguageGroup" />
+                    </HBox>
+
+                    <Label styleClass="field-group" text="%settings.custom.slug" />
+                    <HBox spacing="15.0">
+                        <RadioButton fx:id="rbSlugAuto" selected="true" text="%settings.slug.auto">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="slugOption" />
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="rbSlugCustom" text="%settings.slug.custom" toggleGroup="$slugOption" />
+                        <RadioButton fx:id="rbSlugEnglish" text="%settings.slug.english" toggleGroup="$slugOption" />
+                    </HBox>
+                    <Label styleClass="text-muted, text-small" text="%settings.slug.hint" />
+                    <Label fx:id="lblSlugNote" styleClass="danger, text-small, text-bold" text="%settings.slug.english.note" visible="false" graphicTextGap="8">
+                        <graphic><FontIcon iconLiteral="fth-alert-triangle" iconSize="14" styleClass="danger"/></graphic>
+                    </Label>
+                </VBox>
+
+                <!-- قسم المشاركة على الشبكات الاجتماعية -->
+                <VBox spacing="10.0" styleClass="surface-card">
+                    <Label text="%settings.sharing" styleClass="title-4" graphicTextGap="8">
+                        <graphic><FontIcon iconLiteral="fth-share-2" iconSize="18" styleClass="accent"/></graphic>
+                        <font><Font name="System Bold" size="16.0" /></font>
+                    </Label>
+                    <Separator />
+
+                    <Label text="%settings.telegram.token" />
+                    <PasswordTextField fx:id="txtTelegramToken" promptText="123456789:AA..." />
+                    <Label styleClass="text-muted, text-small" text="%settings.telegram.token.hint" wrapText="true" />
+
+                    <Label styleClass="field-group" text="%settings.facebook.token" />
+                    <PasswordTextField fx:id="txtFacebookToken" promptText="EAA..." />
+                    <Label styleClass="text-muted, text-small" text="%settings.facebook.token.hint" wrapText="true" />
+                </VBox>
+
+                <!-- تعليمات -->
+                <VBox spacing="5.0" styleClass="hint-panel">
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <FontIcon iconLiteral="fth-info" styleClass="accent"/>
+                        <Label text="%setting.get.key" styleClass="accent">
+                            <font><Font name="System Bold" size="13.0" /></font>
+                        </Label>
+                    </HBox>
+                    <Label styleClass="text-muted" text="• OpenAI: https://platform.openai.com/api-keys" />
+                    <Label styleClass="text-muted" text="• Gemini: https://aistudio.google.com/app/apikey" />
+                    <Label styleClass="text-muted" text="• Claude: https://console.anthropic.com/settings/keys" />
+                    <Label styleClass="text-muted" text="• Unsplash: https://unsplash.com/oauth/applications" />
+                    <Label styleClass="text-muted" text="• Telegram: https://t.me/BotFather" />
+                    <Label styleClass="text-muted" text="• Facebook: https://developers.facebook.com/tools/explorer" />
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="10.0" styleClass="app-toolbar">
+            <Button fx:id="btnCancel" onAction="#handleCancel" minWidth="-Infinity" text="%categories.cancel.button">
+                <graphic><FontIcon iconLiteral="fth-x"/></graphic>
+            </Button>
+            <Button fx:id="btnSave" onAction="#handleSave" minWidth="-Infinity" styleClass="accent" text="%settings.save.button">
+                <graphic><FontIcon iconLiteral="fth-check"/></graphic>
+            </Button>
+        </HBox>
+    </bottom>
+
+</BorderPane>

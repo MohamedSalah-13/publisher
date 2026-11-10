@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<BorderPane prefHeight="600.0" prefWidth="900.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hamzatech.publisher.controller.WordPressSitesController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="app-toolbar">
+            <FontIcon iconLiteral="fth-globe" iconSize="18" styleClass="accent"/>
+            <Label text="%wordpress.sites.header" styleClass="accent, title-4">
+                <font>
+                    <Font name="System Bold" size="20.0"/>
+                </font>
+            </Label>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox spacing="20.0" styleClass="content-area">
+
+            <!-- القسم الأيسر: قائمة المواقع المحفوظة -->
+            <VBox spacing="15.0" prefWidth="420.0" HBox.hgrow="ALWAYS" styleClass="surface-card">
+                <Label text="%wordpress.saved.sites" styleClass="title-4" graphicTextGap="8">
+                    <graphic><FontIcon iconLiteral="fth-server" iconSize="18" styleClass="accent"/></graphic>
+                    <font>
+                        <Font name="System Bold" size="16.0"/>
+                    </font>
+                </Label>
+                <Separator/>
+                <ListView fx:id="sitesList" prefHeight="400.0" VBox.vgrow="ALWAYS"/>
+                <Label styleClass="text-muted, text-small" text="%wordpress.hint.app.password" wrapText="true" minHeight="-Infinity" graphicTextGap="8">
+                    <graphic><FontIcon iconLiteral="fth-info" iconSize="14" styleClass="text-muted"/></graphic>
+                </Label>
+            </VBox>
+
+            <!-- القسم الأيمن: نموذج إضافة/تعديل موقع -->
+            <VBox spacing="10.0" prefWidth="420.0" HBox.hgrow="ALWAYS" styleClass="surface-card">
+                <Label text="%wordpress.site.details" styleClass="title-4" graphicTextGap="8">
+                    <graphic><FontIcon iconLiteral="fth-edit" iconSize="18" styleClass="accent"/></graphic>
+                    <font>
+                        <Font name="System Bold" size="16.0"/>
+                    </font>
+                </Label>
+                <Separator/>
+
+                <Label text="%wordpress.field.name"/>
+                <TextField fx:id="txtName" promptText="%wordpress.field.name.prompt"/>
+
+                <Label text="%wordpress.field.url"/>
+                <TextField fx:id="txtSiteUrl" promptText="https://example.com"/>
+
+                <Label text="%wordpress.field.username"/>
+                <TextField fx:id="txtUsername" promptText="%wordpress.field.username.prompt"/>
+
+                <Label text="%wordpress.field.app.password"/>
+                <PasswordField fx:id="txtApplicationPassword" promptText="xxxx xxxx xxxx xxxx xxxx xxxx"/>
+
+                <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="field-group">
+                    <Button fx:id="btnTestConnection" onAction="#handleTestConnection" styleClass="button-outlined, accent" text="%wordpress.test.button">
+                        <graphic><FontIcon iconLiteral="fth-wifi"/></graphic>
+                    </Button>
+                </HBox>
+
+                <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="card-actions">
+                    <Button text="%wordpress.add.button" onAction="#handleAdd" styleClass="success">
+                        <graphic><FontIcon iconLiteral="fth-plus"/></graphic>
+                    </Button>
+                    <Button text="%wordpress.update.button" onAction="#handleUpdate" styleClass="warning">
+                        <graphic><FontIcon iconLiteral="fth-edit-2"/></graphic>
+                    </Button>
+                    <Button text="%wordpress.delete.button" onAction="#handleDelete" styleClass="danger">
+                        <graphic><FontIcon iconLiteral="fth-trash-2"/></graphic>
+                    </Button>
+                </HBox>
+            </VBox>
+
+        </HBox>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="10.0" styleClass="app-toolbar">
+            <Label fx:id="lblStatus" text="%wordpress.status.ready" styleClass="text-muted" HBox.hgrow="ALWAYS"/>
+            <Button text="%categories.close.button" onAction="#handleClose" prefWidth="100.0"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

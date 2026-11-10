@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane prefHeight="600.0" prefWidth="900.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hamzatech.publisher.controller.PublishLogController">
+
+    <!-- Header -->
+    <top>
+        <VBox spacing="10.0" styleClass="app-toolbar">
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <FontIcon iconLiteral="fth-list" iconSize="18" styleClass="accent"/>
+                <Label text="%logs.title" styleClass="accent, title-4">
+                    <font>
+                        <Font name="System Bold" size="18.0" />
+                    </font>
+                </Label>
+                <HBox HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnRefresh" text="%logs.refresh" onAction="#handleRefresh">
+                    <graphic><FontIcon iconLiteral="fth-refresh-cw"/></graphic>
+                </Button>
+                <Button fx:id="btnClearAll" text="%logs.clear.all" onAction="#handleClearAll" styleClass="danger">
+                    <graphic><FontIcon iconLiteral="fth-trash-2"/></graphic>
+                </Button>
+            </HBox>
+
+            <!-- Statistics -->
+            <HBox spacing="20.0" alignment="CENTER_LEFT" styleClass="surface-card">
+                <VBox alignment="CENTER" spacing="5.0">
+                    <Label text="%logs.stats.total" styleClass="text-muted" />
+                    <Label fx:id="lblTotalCount" text="0" styleClass="title-2, accent" />
+                </VBox>
+                <Separator orientation="VERTICAL" />
+                <VBox alignment="CENTER" spacing="5.0">
+                    <Label text="%logs.stats.success" styleClass="text-muted" />
+                    <Label fx:id="lblSuccessCount" text="0" styleClass="title-2, success" />
+                </VBox>
+                <Separator orientation="VERTICAL" />
+                <VBox alignment="CENTER" spacing="5.0">
+                    <Label text="%logs.stats.failed" styleClass="text-muted" />
+                    <Label fx:id="lblFailedCount" text="0" styleClass="title-2, danger" />
+                </VBox>
+                <Separator orientation="VERTICAL" />
+                <VBox alignment="CENTER" spacing="5.0">
+                    <Label text="%logs.stats.success.rate" styleClass="text-muted" />
+                    <Label fx:id="lblSuccessRate" text="0%" styleClass="title-2, warning" />
+                </VBox>
+            </HBox>
+
+            <!-- Filter -->
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <Label text="%logs.filter.status" />
+                <ComboBox fx:id="cmbStatusFilter" prefWidth="150.0" />
+                <Label text="%logs.filter.blog" />
+                <ComboBox fx:id="cmbBlogFilter" prefWidth="250.0" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- Table -->
+    <center>
+        <TableView fx:id="tblLogs" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colStatus" text="%logs.table.status" prefWidth="80" />
+                <TableColumn fx:id="colTitle" text="%logs.table.title" prefWidth="250" />
+                <TableColumn fx:id="colBlog" text="%logs.table.blog" prefWidth="150" />
+                <TableColumn fx:id="colCategory" text="%logs.table.category" prefWidth="120" />
+                <TableColumn fx:id="colDate" text="%logs.table.date" prefWidth="150" />
+                <TableColumn fx:id="colUrl" text="%logs.table.url" prefWidth="100" />
+                <TableColumn fx:id="colRetry" text="%logs.table.retry" prefWidth="120" />
+            </columns>
+            <placeholder>
+                <Label text="%logs.table.empty" />
+            </placeholder>
+        </TableView>
+    </center>
+
+    <!-- Bottom Status Bar -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="app-toolbar">
+            <Label fx:id="lblStatus" text="%logs.status.ready" styleClass="text-muted" />
+        </HBox>
+    </bottom>
+
+</BorderPane>

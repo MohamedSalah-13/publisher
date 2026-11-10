@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>Publisher Portfolio EN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#1a73e8; --accent-d:#1557b0; --success:#34a853; --danger:#ea4335;
+    --warning:#fbbc04; --purple:#9334e6; --gray:#5f6368;
+    --ink:#0f1b2d; --muted:#5b6778; --line:#e3e8ef; --paper:#f6f8fa; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#0b1220}
+  body{font-family:"Inter","Segoe UI",sans-serif;color:var(--ink)}
+  .slide{width:1600px;height:1200px;position:relative;overflow:hidden;display:none}
+  .slide.show{display:block}
+  .en{font-family:"Inter","Segoe UI",sans-serif;direction:ltr;unicode-bidi:isolate}
+  svg.i{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  /* ---------- shared light slide ---------- */
+  .light{background:
+      radial-gradient(900px 600px at 100% 0%, #e8f0fe 0%, transparent 60%),
+      radial-gradient(700px 500px at 0% 100%, #f3e8fd 0%, transparent 60%),
+      var(--paper);}
+  .head{position:absolute;top:70px;right:90px;left:90px;display:flex;align-items:center;justify-content:space-between}
+  .kicker{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:24px;color:var(--accent);
+          background:#e8f0fe;padding:8px 20px;border-radius:999px}
+  .brand{display:flex;align-items:center;gap:14px;font-weight:700;font-size:22px;color:var(--muted)}
+  .brand img{width:52px;height:52px}
+  h2.t{position:absolute;top:150px;right:90px;left:90px;font-size:68px;font-weight:900;line-height:1.25}
+  h2.t b{color:var(--accent)}
+  p.sub{position:absolute;top:255px;right:90px;left:90px;font-size:28px;color:var(--muted);font-weight:600}
+  .foot{position:absolute;bottom:50px;right:90px;left:90px;display:flex;justify-content:space-between;
+        font-size:20px;color:#8a95a5;font-weight:600}
+
+  /* ---------- 1. cover ---------- */
+  #s1{background:
+      radial-gradient(1000px 700px at 85% -10%, #1a73e855 0%, transparent 60%),
+      radial-gradient(800px 600px at -5% 110%, #9334e640 0%, transparent 60%),
+      linear-gradient(160deg,#0b1220 0%,#111c33 60%,#0d1528 100%);color:#fff}
+  #s1 .grid{position:absolute;inset:0;background-image:
+      linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);
+      background-size:64px 64px}
+  #s1 .logo{position:absolute;top:90px;right:100px;display:flex;align-items:center;gap:22px}
+  #s1 .logo img{width:110px;height:110px;filter:drop-shadow(0 12px 30px #1a73e866)}
+  #s1 .logo .n{font-size:30px;font-weight:700;color:#aecbfa}
+  #s1 .logo .n small{display:block;font-size:22px;color:#8ea0bd;font-weight:600}
+  #s1 h1{position:absolute;top:270px;right:100px;width:820px;font-size:84px;font-weight:900;line-height:1.2}
+  #s1 h1 span{background:linear-gradient(90deg,#8ab4f8,#c58af9);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #s1 .lead{position:absolute;top:510px;right:100px;width:760px;font-size:30px;line-height:1.7;color:#c9d4e5;font-weight:600}
+  #s1 .chips{position:absolute;top:700px;right:100px;width:780px;display:flex;flex-wrap:wrap;gap:14px}
+  .chip{display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:14px;font-size:23px;font-weight:700;
+        background:#ffffff10;border:1px solid #ffffff22;color:#e8eefc}
+  .chip i{width:12px;height:12px;border-radius:50%;display:inline-block}
+  #s1 .stats{position:absolute;bottom:90px;right:100px;display:flex;gap:56px}
+  #s1 .stat b{display:block;font-size:52px;font-weight:900;color:#fff;line-height:1.1}
+  #s1 .stat span{font-size:22px;color:#8ea0bd;font-weight:600}
+  #s1 .mock{position:absolute;left:40px;top:290px;width:580px;transform:perspective(1600px) rotateY(14deg) rotateX(4deg);}
+
+  /* ---------- window mock (used in cover + dashboard) ---------- */
+  .win{background:#fff;border-radius:18px;box-shadow:0 40px 90px #0006,0 0 0 1px #0000000d;overflow:hidden;color:var(--ink)}
+  .win .bar{height:52px;background:#f6f8fa;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+  .win .bar .ttl{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700}
+  .win .bar .ttl img{width:26px;height:26px}
+  .win .bar .ctl{display:flex;gap:18px;color:#8a95a5;font-size:16px;direction:ltr}
+  .win .tabs{display:flex;gap:4px;padding:10px 16px 0;background:#f6f8fa;border-bottom:1px solid var(--line)}
+  .win .tab{padding:9px 18px;font-size:15px;font-weight:700;color:var(--muted);border-radius:10px 10px 0 0}
+  .win .tab.on{background:#fff;color:var(--accent);border:1px solid var(--line);border-bottom-color:#fff;margin-bottom:-1px}
+  .win .body{padding:22px}
+  .lbl{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .lbl svg{color:var(--accent);font-size:18px}
+  .field{border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center;background:#fff}
+  .field .caret{color:#8a95a5}
+  .tag{font-size:12px;font-weight:800;padding:3px 9px;border-radius:6px}
+  .tag.wp{background:#e8f0fe;color:#1a73e8}.tag.bl{background:#fef3e0;color:#e37400}
+  .cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .cat{border:1px solid var(--line);border-radius:12px;padding:12px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .cat.on{border-color:var(--accent);background:#e8f0fe;color:var(--accent-d)}
+  .cat svg{font-size:18px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:11px 18px;font-size:16px;font-weight:800}
+  .btn.p{background:var(--accent);color:#fff}.btn.s{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .btn.d{background:#fdecea;color:#c5221f}
+  .prog{height:12px;border-radius:99px;background:#e8eaed;overflow:hidden}
+  .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#4f8ff0);border-radius:99px}
+  .row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #eef1f5;font-size:15px;font-weight:600}
+  .row:last-child{border-bottom:0}
+  .dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:14px;flex:none}
+  .dot.ok{background:var(--success)}.dot.run{background:var(--accent)}.dot.wait{background:#c4c9d0}.dot.skip{background:var(--warning)}
+  .row .t{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .st{font-size:13px;font-weight:800}
+  .ok-t{color:#188038}.run-t{color:var(--accent)}.wait-t{color:#80868b}.skip-t{color:#b06000}
+
+  /* ---------- 2. pipeline ---------- */
+  .flow{position:absolute;top:400px;right:90px;left:90px;display:flex;align-items:stretch;gap:0}
+  .step{flex:1;min-height:400px;background:var(--card);border:1px solid var(--line);border-radius:26px;padding:36px 22px 30px;text-align:center;
+        box-shadow:0 14px 40px #1a73e812;position:relative}
+  .step .num{position:absolute;top:-22px;right:50%;transform:translateX(50%);width:44px;height:44px;border-radius:50%;
+             background:var(--ink);color:#fff;font-weight:900;font-size:22px;display:grid;place-items:center}
+  .step .ic{width:96px;height:96px;border-radius:26px;margin:14px auto 22px;display:grid;place-items:center;font-size:48px}
+  .step h3{font-size:30px;font-weight:900;margin-bottom:10px}
+  .step p{font-size:21px;color:var(--muted);line-height:1.6;font-weight:600}
+  .arrow{width:56px;display:grid;place-items:center;color:#b0bccd;font-size:40px}
+  .note{position:absolute;bottom:150px;right:90px;left:90px;background:var(--ink);color:#fff;border-radius:24px;
+        padding:30px 40px;display:flex;align-items:center;gap:26px;font-size:27px;font-weight:700;line-height:1.6}
+  .note svg{font-size:48px;color:#8ab4f8}
+  .note small{display:block;font-size:22px;color:#a9b6ca;font-weight:600}
+
+  /* ---------- 3. dashboard ---------- */
+  #s3 .bigwin{position:absolute;top:350px;right:90px;left:90px}
+  #s3 .bigwin .body{display:grid;grid-template-columns:1.15fr 1fr;gap:26px;padding:26px}
+  .panel{border:1px solid var(--line);border-radius:16px;padding:20px}
+  .panel+.panel{margin-top:18px}
+  .callout{position:absolute;background:var(--ink);color:#fff;font-size:20px;font-weight:800;padding:10px 18px;border-radius:12px;
+           box-shadow:0 10px 30px #0003;display:flex;align-items:center;gap:8px}
+  .callout svg{color:#8ab4f8}
+
+  /* ---------- 4. features ---------- */
+  .feat{position:absolute;top:330px;right:90px;left:90px;display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  .f{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:40px 36px;min-height:320px;box-shadow:0 10px 30px #0f1b2d0a}
+  .f .ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:32px;margin-bottom:18px}
+  .f h3{font-size:28px;font-weight:900;margin-bottom:8px}
+  .f p{font-size:20px;color:var(--muted);line-height:1.6;font-weight:600}
+  .c-blue{background:#e8f0fe;color:#1a73e8}.c-green{background:#e6f4ea;color:#188038}.c-red{background:#fce8e6;color:#c5221f}
+  .c-yellow{background:#fef7e0;color:#b06000}.c-purple{background:#f3e8fd;color:#8430ce}.c-gray{background:#f1f3f4;color:#3c4043}
+
+  /* ---------- 5. reliability ---------- */
+  .two{position:absolute;top:330px;right:90px;left:90px;display:grid;grid-template-columns:1fr 1fr;gap:34px}
+  .big{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:48px 44px;min-height:640px;box-shadow:0 14px 40px #0f1b2d0d}
+  .big h3{font-size:36px;font-weight:900;margin-bottom:26px;display:flex;align-items:center;gap:16px}
+  .big h3 .ic{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;font-size:32px}
+  .li{display:flex;gap:16px;align-items:flex-start;margin-bottom:40px}
+  .li:last-child{margin-bottom:0}
+  .li svg{font-size:30px;color:var(--success);margin-top:6px}
+  .li b{display:block;font-size:26px;font-weight:800}
+  .li span{font-size:21px;color:var(--muted);font-weight:600;line-height:1.6}
+
+  /* ---------- 6. tech ---------- */
+  .stack{position:absolute;top:360px;right:90px;left:90px;display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+  .tech{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:44px 24px;text-align:center;box-shadow:0 10px 30px #0f1b2d0a}
+  .tech .lg{font-family:"Inter",sans-serif;font-weight:700;font-size:30px;direction:ltr;margin-bottom:8px}
+  .tech span{font-size:19px;color:var(--muted);font-weight:600}
+  .arch{position:absolute;top:800px;right:90px;left:90px;background:var(--ink);border-radius:28px;padding:36px 44px;color:#fff}
+  .arch h3{font-size:30px;font-weight:900;margin-bottom:22px;display:flex;align-items:center;gap:14px}
+  .arch h3 svg{color:#8ab4f8}
+  .arch .pts{display:grid;grid-template-columns:1fr 1fr;gap:16px 40px}
+  .arch .pts div{font-size:22px;color:#c9d4e5;font-weight:600;display:flex;gap:12px;align-items:flex-start;line-height:1.55}
+  .arch .pts svg{color:#81c995;font-size:26px;margin-top:4px}
+  /* ---------- LTR overrides ---------- */
+  h2.t{letter-spacing:-0.5px;font-size:64px}
+  #s1 .logo,#s1 h1,#s1 .lead,#s1 .chips,#s1 .stats{right:auto;left:100px}
+  #s1 h1{font-size:80px;letter-spacing:-1px;line-height:1.12;width:860px}
+  #s1 .lead{top:500px;width:780px;font-size:28px}
+  #s1 .mock{left:auto;right:40px;transform:perspective(1600px) rotateY(-14deg) rotateX(4deg)}
+  .step h3{font-size:28px}
+  .row .st{white-space:nowrap}
+</style>
+</head>
+<body>
+
+<!-- ================= 1. COVER ================= -->
+<section class="slide" id="s1">
+  <div class="grid"></div>
+  <div class="logo">
+    <img src="icon.png" alt="">
+    <div class="n">Hamza Tech Publisher<small>Desktop app · Windows</small></div>
+  </div>
+  <h1>Publish your articles <span>automatically</span> with AI</h1>
+  <div class="lead">Drop a list of titles into an Excel file. The app writes each article, adds an image and internal links, then publishes it to your Blogger blog or WordPress site.</div>
+  <div class="chips">
+    <span class="chip"><i style="background:#f57c00"></i>Blogger</span>
+    <span class="chip"><i style="background:#3b8cc4"></i>WordPress</span>
+    <span class="chip"><i style="background:#34a853"></i>OpenAI</span>
+    <span class="chip"><i style="background:#4285f4"></i>Gemini</span>
+    <span class="chip"><i style="background:#d97757"></i>Claude</span>
+    <span class="chip"><i style="background:#fbbc04"></i>Unsplash</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>3</b><span>AI providers</span></div>
+    <div class="stat"><b>2</b><span>Publishing platforms</span></div>
+    <div class="stat"><b>EN / AR</b><span>UI and content</span></div>
+  </div>
+  <div class="mock" id="coverMock"></div>
+</section>
+
+<!-- ================= 2. PIPELINE ================= -->
+<section class="slide light" id="s2">
+  <div class="head"><span class="kicker" data-i="zap">How it works</span><span class="brand"><img src="icon.png" alt="">Hamza Tech Publisher</span></div>
+  <h2 class="t">From a <b>title</b> to a <b>published post</b> in one step</h2>
+  <p class="sub">The app runs these stages for every title in the file, one after another, with no input from you.</p>
+  <div class="flow">
+    <div class="step"><span class="num">1</span><div class="ic c-green" data-i="grid"></div><h3>Excel file</h3><p>Your list of titles, or titles generated by AI</p></div>
+    <div class="arrow" data-i="arrowR"></div>
+    <div class="step"><span class="num">2</span><div class="ic c-blue" data-i="cpu"></div><h3>Write the article</h3><p>OpenAI, Gemini or Claude, with a quality check</p></div>
+    <div class="arrow" data-i="arrowR"></div>
+    <div class="step"><span class="num">3</span><div class="ic c-purple" data-i="search"></div><h3>SEO &amp; links</h3><p>Internal links, plus meta description and tags on WordPress</p></div>
+    <div class="arrow" data-i="arrowR"></div>
+    <div class="step"><span class="num">4</span><div class="ic c-yellow" data-i="image"></div><h3>Header image</h3><p>From Unsplash or generated by AI</p></div>
+    <div class="arrow" data-i="arrowR"></div>
+    <div class="step"><span class="num">5</span><div class="ic c-red" data-i="send"></div><h3>Publish</h3><p>To Blogger or WordPress, logged per article</p></div>
+  </div>
+  <div class="note"><span data-i="clock"></span><div>Scheduled publishing with a delay between posts<small>Run the batch now or at a set time, and let the app do the work.</small></div></div>
+  <div class="foot"><span>Desktop app · Java 25 / JavaFX</span><span>Blogger · WordPress · OpenAI · Gemini · Claude</span></div>
+</section>
+
+<!-- ================= 3. DASHBOARD ================= -->
+<section class="slide light" id="s3">
+  <div class="head"><span class="kicker" data-i="layers">Dashboard</span><span class="brand"><img src="icon.png" alt="">Hamza Tech Publisher</span></div>
+  <h2 class="t">Everything on <b>one screen</b></h2>
+  <p class="sub">Pick the site, the category and the file, then follow the batch article by article.</p>
+  <div class="bigwin win" id="dashMock"></div>
+  <div class="foot"><span>Preview before publishing · Scheduling · Stop at any time</span><span>Sample data</span></div>
+</section>
+
+<!-- ================= 4. FEATURES ================= -->
+<section class="slide light" id="s4">
+  <div class="head"><span class="kicker" data-i="check">Features</span><span class="brand"><img src="icon.png" alt="">Hamza Tech Publisher</span></div>
+  <h2 class="t">Built to publish <b>faster and smarter</b></h2>
+  <div class="feat">
+    <div class="f"><div class="ic c-blue" data-i="globe"></div><h3>Two platforms, one list</h3><p>Blogger blogs and WordPress sites side by side, with each site's categories.</p></div>
+    <div class="f"><div class="ic c-purple" data-i="cpu"></div><h3>3 AI providers</h3><p>OpenAI, Gemini and Claude, with your choice of model, length and custom instructions.</p></div>
+    <div class="f"><div class="ic c-green" data-i="checkc"></div><h3>Automatic quality check</h3><p>Catches incomplete or badly formatted articles and regenerates them before publishing.</p></div>
+    <div class="f"><div class="ic c-yellow" data-i="search"></div><h3>SEO built in</h3><p>"Read also" internal links and image alt text, plus meta description and tags on WordPress.</p></div>
+    <div class="f"><div class="ic c-red" data-i="copy"></div><h3>No duplicates</h3><p>Never publishes the same title twice to the same site, even if the file repeats it.</p></div>
+    <div class="f"><div class="ic c-gray" data-i="sliders"></div><h3>Per-site settings</h3><p>Language, AI provider, default category and draft or publish, for each site.</p></div>
+  </div>
+  <div class="foot"><span>Arabic &amp; English UI · Dark and light themes</span><span>Title translation · Title ideas · Article preview</span></div>
+</section>
+
+<!-- ================= 5. RELIABILITY ================= -->
+<section class="slide light" id="s5">
+  <div class="head"><span class="kicker" data-i="shield">Reliability &amp; security</span><span class="brand"><img src="icon.png" alt="">Hamza Tech Publisher</span></div>
+  <h2 class="t">Never lose your work, <b>or your keys</b></h2>
+  <div class="two">
+    <div class="big">
+      <h3><span class="ic c-blue" data-i="refresh"></span>Publishing continuity</h3>
+      <div class="li"><span data-i="checkc"></span><div><b>A queue that survives closing</b><span>Closed the app mid-batch? It picks up where it stopped next time you open it.</span></div></div>
+      <div class="li"><span data-i="checkc"></span><div><b>Smart retries</b><span>Failed requests are retried automatically, without ever posting an article twice.</span></div></div>
+      <div class="li"><span data-i="checkc"></span><div><b>Full publishing log</b><span>Every post's link and status, with one click to retry only what failed.</span></div></div>
+    </div>
+    <div class="big">
+      <h3><span class="ic c-green" data-i="lock"></span>Data protection</h3>
+      <div class="li"><span data-i="checkc"></span><div><b>Encrypted API keys</b><span>Stored encrypted with Windows DPAPI, never as plain text.</span></div></div>
+      <div class="li"><span data-i="checkc"></span><div><b>Secure connections only</b><span>WordPress passwords are only ever sent over HTTPS.</span></div></div>
+      <div class="li"><span data-i="checkc"></span><div><b>Official sign-in</b><span>Blogger through Google OAuth, WordPress through Application Passwords.</span></div></div>
+    </div>
+  </div>
+  <div class="foot"><span>Your data stays on your machine</span><span>Standalone Windows installer · No Java install needed</span></div>
+</section>
+
+<!-- ================= 6. TECH ================= -->
+<section class="slide light" id="s6">
+  <div class="head"><span class="kicker" data-i="code">Tech stack</span><span class="brand"><img src="icon.png" alt="">Hamza Tech Publisher</span></div>
+  <h2 class="t">Built with <b>Java 25</b> + <b>JavaFX</b></h2>
+  <p class="sub">An extensible design: a new AI provider or publishing platform is a single class.</p>
+  <div class="stack">
+    <div class="tech"><div class="lg" style="color:#e76f00">Java 25</div><span>Language &amp; runtime</span></div>
+    <div class="tech"><div class="lg" style="color:#1a73e8">JavaFX 25</div><span>Desktop UI</span></div>
+    <div class="tech"><div class="lg" style="color:#8430ce">AtlantaFX</div><span>Modern dark/light theme</span></div>
+    <div class="tech"><div class="lg" style="color:#c71a36">Maven</div><span>Build &amp; tests</span></div>
+    <div class="tech"><div class="lg" style="color:#f57c00">Blogger API</div><span>Google OAuth 2.0</span></div>
+    <div class="tech"><div class="lg" style="color:#21759b">WP REST API</div><span>Posts, media, categories</span></div>
+    <div class="tech"><div class="lg" style="color:#188038">OkHttp</div><span>HTTP with retries</span></div>
+    <div class="tech"><div class="lg" style="color:#3c4043">Apache POI</div><span>Excel read &amp; write</span></div>
+  </div>
+  <div class="arch">
+    <h3><span data-i="layers"></span>Clean, maintainable architecture</h3>
+    <div class="pts">
+      <div><span data-i="checkc"></span>A provider registry instead of branching logic</div>
+      <div><span data-i="checkc"></span>Batch publishing service decoupled from the UI and testable</div>
+      <div><span data-i="checkc"></span>JUnit unit tests for every core service</div>
+      <div><span data-i="checkc"></span>Windows installer via jpackage with a bundled Java runtime</div>
+    </div>
+  </div>
+</section>
+
+<script>
+const P = {
+  zap:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  grid:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>',
+  cpu:'<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>',
+  search:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+  send:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  arrowL:'<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  layers:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  checkc:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  sliders:'<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  refresh:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+  lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  code:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+  folder:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  play:'<polygon points="5 3 19 12 5 21 5 3"/>',
+  stop:'<rect x="5" y="5" width="14" height="14" rx="2"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  tag:'<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+  heart:'<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>',
+  monitor:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  dollar:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+};
+const ic = n => `<svg class="i" viewBox="0 0 24 24">${P[n]}</svg>`;
+
+const bar = `<div class="bar"><div class="ttl"><img src="icon.png" alt="">Hamza Tech Publisher</div><div class="ctl">— ▢ ✕</div></div>`;
+P.arrowR = '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>';
+const tabs = `<div class="tabs"><span class="tab on">Dashboard</span><span class="tab">Settings</span><span class="tab">Publish log</span><span class="tab">Queue</span></div>`;
+const rows = [
+  ['ok','10 tips to speed up your website','Published'],
+  ['ok','A beginner’s guide to content marketing','Published'],
+  ['skip','How to choose the right hosting for your blog','Already posted'],
+  ['run','The benefits of AI in education','Writing…'],
+  ['wait','Common SEO mistakes to avoid','Waiting'],
+  ['wait','Ways to make money blogging in 2026','Waiting'],
+];
+const mark = {ok:ic('check'),run:'…',wait:'',skip:'↺'};
+const rowsHtml = n => rows.slice(0,n).map(r=>`<div class="row"><span class="dot ${r[0]}">${mark[r[0]]}</span><span class="t">${r[1]}</span><span class="st ${r[0]}-t">${r[2]}</span></div>`).join('');
+
+document.getElementById('coverMock').innerHTML = `<div class="win">${bar}${tabs}
+  <div class="body">
+    <div class="lbl">${ic('globe')}Site</div>
+    <div class="field" style="margin-bottom:16px"><span>Tech Blog <span class="tag wp">WordPress</span></span><span class="caret">▾</span></div>
+    <div class="lbl">${ic('tag')}Category</div>
+    <div class="cats" style="margin-bottom:18px"><div class="cat on">${ic('monitor')}Tech</div><div class="cat">${ic('heart')}Health</div><div class="cat">${ic('dollar')}Money</div></div>
+    <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;margin-bottom:8px"><span>Publishing 3 of 6</span><span style="color:var(--accent)">50%</span></div>
+    <div class="prog" style="margin-bottom:12px"><i style="width:50%"></i></div>
+    ${rowsHtml(5)}
+  </div></div>`;
+
+document.getElementById('dashMock').innerHTML = `${bar}${tabs}
+  <div class="body">
+    <div>
+      <div class="panel">
+        <div class="lbl">${ic('globe')}Target site</div>
+        <div class="field" style="margin-bottom:18px"><span>Tech Blog &nbsp;<span class="tag wp">WordPress</span></span><span class="caret">▾</span></div>
+        <div class="lbl">${ic('tag')}Category</div>
+        <div class="cats" style="margin-bottom:18px">
+          <div class="cat on">${ic('monitor')}Tech</div><div class="cat">${ic('heart')}Health</div><div class="cat">${ic('dollar')}Business</div>
+        </div>
+        <div class="lbl">${ic('file')}Titles file</div>
+        <div class="field"><span style="font-weight:600">titles-october.xlsx</span><span style="color:var(--success);font-size:14px;font-weight:800">6 titles</span></div>
+      </div>
+      <div class="panel" style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="btn p">${ic('play')}Start</span>
+        <span class="btn s">${ic('eye')}Preview</span>
+        <span class="btn s">${ic('zap')}Title ideas</span>
+        <span class="btn s">${ic('clock')}Schedule</span>
+        <span class="btn d">${ic('stop')}Stop</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;font-size:17px;font-weight:800;margin-bottom:10px"><span>Publishing · 3 of 6</span><span style="color:var(--accent)">50%</span></div>
+      <div class="prog" style="margin-bottom:14px"><i style="width:50%"></i></div>
+      ${rowsHtml(6)}
+      <div style="display:flex;gap:10px;margin-top:16px;font-size:15px;font-weight:800">
+        <span style="background:#e6f4ea;color:#188038;padding:6px 12px;border-radius:8px">2 published</span>
+        <span style="background:#fef7e0;color:#b06000;padding:6px 12px;border-radius:8px">1 skipped</span>
+        <span style="background:#f1f3f4;color:#5f6368;padding:6px 12px;border-radius:8px">3 left</span>
+      </div>
+    </div>
+  </div>`;
+
+document.querySelectorAll('[data-i]').forEach(el => el.insertAdjacentHTML('afterbegin', ic(el.dataset.i)));
+
+const n = (location.hash || '#1').slice(1);
+const all = n === 'all';
+document.querySelectorAll('.slide').forEach(s => { if (all || s.id === 's' + n) s.classList.add('show'); });
+if (all) document.querySelectorAll('.slide').forEach(s => s.style.marginBottom = '24px');
+</script>
+</body>
+</html>

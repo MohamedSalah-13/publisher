@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane prefHeight="840.0" prefWidth="1240.0" styleClass="publisher-dashboard" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hamzatech.publisher.controller.DashboardController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="app-toolbar">
+            <ImageView fitWidth="28" fitHeight="28" preserveRatio="true" smooth="true">
+                <Image url="@../images/app-icon-64.png"/>
+            </ImageView>
+            <Label text="%dashboard.publisher" styleClass="accent, title-4">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Label>
+            <Separator orientation="VERTICAL" />
+            <Label maxWidth="170" minWidth="0" fx:id="lblUserEmail" text="user@example.com" styleClass="text-muted" />
+            <HBox HBox.hgrow="ALWAYS" />
+
+            <ComboBox fx:id="cmbLanguage" prefWidth="110.0"><tooltip><Tooltip text="%language.select"/></tooltip></ComboBox>
+            <Button fx:id="btnThemeToggle" styleClass="flat, button-icon">
+                <graphic><FontIcon iconLiteral="fth-moon"/></graphic>
+                <tooltip><Tooltip text="%dashboard.theme.toggle"/></tooltip>
+            </Button>
+            <Separator orientation="VERTICAL" />
+            <!-- أيقونات بتلميحات: النصوص كانت تُقصَّ إلى "..." في العربية والإنجليزية معًا
+                 لأن مجموع عرض الأزرار يتجاوز عرض النافذة -->
+            <!-- يظهر فقط حين توجد دفعة نشر تُوقّفت ولم تكتمل بعد -->
+            <Button fx:id="btnQueue" onAction="#handleQueue" styleClass="warning, button-icon" visible="false" managed="false">
+                <graphic><FontIcon iconLiteral="fth-clock"/></graphic>
+                <tooltip><Tooltip text="%dashboard.queue.button"/></tooltip>
+            </Button>
+            <Button onAction="#handlePublishLogs" styleClass="success, button-icon">
+                <graphic><FontIcon iconLiteral="fth-list"/></graphic>
+                <tooltip><Tooltip text="%dashboard.logs.button"/></tooltip>
+            </Button>
+            <Button onAction="#handleCategories" styleClass="button-icon">
+                <graphic><FontIcon iconLiteral="fth-tag"/></graphic>
+                <tooltip><Tooltip text="%dashboard.categories.button"/></tooltip>
+            </Button>
+            <Button onAction="#handleWordPressSites" styleClass="button-icon">
+                <graphic><FontIcon iconLiteral="fth-globe"/></graphic>
+                <tooltip><Tooltip text="%dashboard.wordpress.button"/></tooltip>
+            </Button>
+            <Button onAction="#handleSettings" styleClass="button-icon">
+                <graphic><FontIcon iconLiteral="fth-settings"/></graphic>
+                <tooltip><Tooltip text="%dashboard.settings.button"/></tooltip>
+            </Button>
+            <Button onAction="#handleLogout" styleClass="danger, flat, button-icon">
+                <graphic><FontIcon iconLiteral="fth-log-out"/></graphic>
+                <tooltip><Tooltip text="%dashboard.logout.button"/></tooltip>
+            </Button>
+        </HBox>
+    </top>
+
+    <center>
+        <TabPane fx:id="workspaceTabs" tabClosingPolicy="ALL_TABS" styleClass="workspace-tabs">
+            <tabs>
+                <Tab text="%overview.tab" closable="false">
+                    <content><fx:include fx:id="overview" source="overview.fxml"/></content>
+                </Tab>
+                <Tab fx:id="publishingTab" text="%overview.publishing.tab" closable="false">
+                    <content>
+                        <ScrollPane fitToWidth="true" hbarPolicy="NEVER">
+                            <content>
+                                <VBox spacing="20.0" styleClass="content-area">
+
+                                    <VBox spacing="10.0" styleClass="surface-card">
+                                        <Label text="%dashboard.blog.select" styleClass="title-4">
+                                            <font><Font name="System Bold" size="14.0" /></font>
+                                        </Label>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <Label text="%dashboard.category.filter" />
+                                            <ComboBox fx:id="cmbCategoryFilter" prefWidth="150.0" promptText="%dashboard.category.all" />
+                                            <Separator orientation="VERTICAL" />
+                                            <ComboBox fx:id="cmbBlogs" prefWidth="350.0" promptText="%dashboard.blogs.loading" HBox.hgrow="ALWAYS" />
+                                            <Button fx:id="btnBlogProfile" onAction="#handleEditProfile" styleClass="button-icon" disable="true">
+                                                <graphic><FontIcon iconLiteral="fth-sliders"/></graphic>
+                                                <tooltip><Tooltip text="%dashboard.profile.button"/></tooltip>
+                                            </Button>
+                                        </HBox>
+                                    </VBox>
+
+                                    <VBox spacing="5.0" styleClass="surface-card">
+                                        <Label text="%dashboard.category.select" styleClass="title-4">
+                                            <font><Font name="System Bold" size="14.0" /></font>
+                                        </Label>
+                                        <ScrollPane fitToWidth="true">
+                                            <content>
+                                                <FlowPane fx:id="categoriesPane" hgap="10.0" prefWrapLength="600.0" styleClass="category-flow" vgap="10.0" />
+                                            </content>
+                                        </ScrollPane>
+                                    </VBox>
+
+                                    <VBox spacing="16.0" styleClass="surface-card">
+                                        <Label text="%dashboard.content" styleClass="title-4">
+                                            <font><Font name="System Bold" size="14.0" /></font>
+                                        </Label>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <Button fx:id="btnUpload" onAction="#handleUploadExcel" styleClass="button-outlined, accent" text="%dashboard.upload.button">
+                                                <graphic><FontIcon iconLiteral="fth-upload"/></graphic>
+                                            </Button>
+                                            <Button fx:id="btnGenerateTitles" onAction="#handleGenerateTitles" styleClass="button-outlined" text="%titles.open.button">
+                                                <graphic><FontIcon iconLiteral="fth-zap"/></graphic>
+                                            </Button>
+                                            <Label maxWidth="360" minWidth="0" fx:id="lblFilePath" text="%dashboard.file.none" styleClass="text-muted" />
+                                            <Button fx:id="btnDeleteFile" onAction="#handleDeleteFile" styleClass="danger" text="%dashboard.delete.button" visible="true">
+                                                <graphic><FontIcon iconLiteral="fth-trash-2"/></graphic>
+                                            </Button>
+                                            <Button fx:id="btnPreview" onAction="#handlePreview" disable="true" styleClass="button-outlined" text="%dashboard.preview.button">
+                                                <graphic><FontIcon iconLiteral="fth-eye"/></graphic>
+                                            </Button>
+                                        </HBox>
+
+                                        <Separator />
+
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <CheckBox fx:id="chkSchedule" text="%dashboard.schedule.enable"/>
+                                            <DatePicker fx:id="dpScheduleDate" prefWidth="140.0"/>
+                                            <Spinner fx:id="spnScheduleHour" editable="true" prefWidth="70.0"/>
+                                            <Label text=":"/>
+                                            <Spinner fx:id="spnScheduleMinute" editable="true" prefWidth="70.0"/>
+                                            <Label fx:id="lblScheduleStatus" styleClass="text-muted, text-small"/>
+                                            <HBox HBox.hgrow="ALWAYS"/>
+                                            <Button fx:id="btnCancelSchedule" onAction="#handleCancelSchedule" styleClass="danger" text="%dashboard.schedule.cancel.button" visible="false" managed="false">
+                                                <graphic><FontIcon iconLiteral="fth-x-circle"/></graphic>
+                                            </Button>
+                                        </HBox>
+
+                                        <Separator />
+
+                                        <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                                            <VBox alignment="CENTER_RIGHT" minWidth="0" HBox.hgrow="ALWAYS">
+                                                <Label fx:id="lblStatus" text="%dashboard.status.ready" wrapText="true" maxWidth="680" minWidth="0" />
+                                                <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" visible="false" />
+                                            </VBox>
+                                            <Button fx:id="btnStart" disable="true" onAction="#handleStart" styleClass="accent, large" text="%dashboard.start.button">
+                                                <graphic><FontIcon iconLiteral="fth-play"/></graphic>
+                                            </Button>
+                                            <Button fx:id="btnStop" styleClass="danger, large" text="%dashboard.stop.button" visible="false" managed="false">
+                                                <graphic><FontIcon iconLiteral="fth-square"/></graphic>
+                                            </Button>
+                                        </HBox>
+                                    </VBox>
+
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>
