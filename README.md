@@ -1,5 +1,7 @@
 # Hamza Publisher
 
+[![CI](https://github.com/MohamedSalah-13/publisher/actions/workflows/ci.yml/badge.svg)](https://github.com/MohamedSalah-13/publisher/actions/workflows/ci.yml) ![Java](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white) ![JavaFX](https://img.shields.io/badge/JavaFX-25-1F6FB2) ![Blogger](https://img.shields.io/badge/Blogger-API-FF5722?logo=blogger&logoColor=white) ![WordPress](https://img.shields.io/badge/WordPress-REST-21759B?logo=wordpress&logoColor=white) ![License](https://img.shields.io/badge/License-MIT-yellow)
+
 **العربية** · [English](README.en.md)
 
 برنامج سطح مكتب ينشر المقالات تلقائيًا على مدونات **Blogger** ومواقع **WordPress** انطلاقًا من قائمة عناوين في ملف Excel. لكل عنوان يكتب المقال بالذكاء الاصطناعي، يجلب صورة رئيسية، يضيف بيانات SEO وروابط داخلية، ينشر، ثم يشارك الرابط على تيليجرام أو فيسبوك.
