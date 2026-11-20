@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class ConfigServiceTest {
 
@@ -104,6 +105,8 @@ class ConfigServiceTest {
 
     @Test
     void saveConfig_writesApiKeysEncrypted_neverInPlainText() throws IOException {
+        assumeTrue(SecretStore.isEncryptionAvailable(), "DPAPI is Windows-only");
+
         String openAi = "sk-plain-openai-value";
         String gemini = "AIza-plain-gemini-value";
         String unsplash = "plain-unsplash-value";
