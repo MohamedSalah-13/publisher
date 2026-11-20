@@ -29,11 +29,11 @@ jobs:
     env:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ env.TAG }}
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '25'
@@ -104,7 +104,7 @@ jobs:
           }
 
       - name: Keep the installer as a workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: installer-${{ env.TAG }}
           path: |
