@@ -28,9 +28,13 @@
 
 ## التثبيت
 
-حمّل ملف التثبيت من صفحة [Releases](https://github.com/MohamedSalah-13/publisher/releases). يحمل نسخة Java خاصة به، ويُثبَّت للمستخدم الحالي دون صلاحيات مدير.
+اختَر ملف التثبيت المناسب لنظامك ومعالجك من صفحة [Releases](https://github.com/MohamedSalah-13/publisher/releases). كل حزمة تتضمّن Java.
 
-> البرنامج يعمل على **Windows 10/11**. التشغيل من المصدر على أنظمة أخرى ممكن، لكن تشفير المفاتيح يعتمد على Windows، وعلى غيره تُحفظ نصًا عاديًا.
+- **Windows 10/11 ‏(x64)** — شغّل ملف `.exe` للتثبيت للمستخدم الحالي.
+- **Ubuntu 24.04 والتوزيعات المتوافقة المبنية على Debian ‏(x64 أو ARM64)** — ثبّت ملف `.deb` المناسب بالأمر `sudo apt install ./<installer>.deb`.
+- **macOS ‏(Intel أو Apple Silicon)** — افتح ملف `.dmg` المناسب واسحب Hamza Publisher إلى Applications. الحزم لا تحمل توقيع Apple Developer ID أو اعتماد Apple.
+
+التطبيق المثبّت يتحقّق تلقائيًا من الإصدارات على GitHub، ويمكنك استخدام زر **تحقّق من التحديثات** في اللوحة. على Linux وmacOS ينزّل التطبيق المثبّت ويفتحه لتكمل التثبيت. تُحدّث نسخة Windows المحمولة يدويًا.
 
 ## الإعداد
 
@@ -112,12 +116,15 @@ cd publisher
 | `./mvnw test` | تشغيل الاختبارات |
 | `./mvnw clean package` | بناء ملف jar قابل للتشغيل في `target/` |
 | `.\packaging\build-installer.ps1` | بناء مثبّت Windows في `target\installer\` |
+| `pwsh ./packaging/build-installer.ps1` | بناء حزمة `.deb` على Linux أو `.dmg` على macOS في `target/installer/` |
 
-بناء المثبّت يحتاج [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases)، أو استخدم `-Type app-image` لنسخة محمولة بلا WiX. إن وُجد `credentials.json` في جذر المشروع يُضمَّن في المثبّت؛ استخدم `-NoCredentials` لاستبعاده.
+تحزيم Windows يحتاج [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases)، ويمكن بناء النسخة المحمولة باستخدام `-Type app-image` بلا WiX. تحزيم Linux يحتاج `fakeroot` و`binutils` و`dpkg-deb`. إن وُجد `credentials.json` في جذر المشروع يُضمَّن في المثبّت ما لم تستخدم `-NoCredentials`.
+
+شغّل سير عمل **CI** مع تفعيل **build_installers** لبناء حزم قابلة للتنزيل دون نشر إصدار. ينشر سير عمل Release حزم كل الأنظمة عند دفع وسم إصدار يشير إلى كومِت يتضمن إعداد التحزيم. حدّث رقم الإصدار في `pom.xml` ليطابق الوسم الجديد أولًا.
 
 ## أين تُحفظ البيانات
 
-الإعدادات والسجلات والطابور وجلسة Google تُحفظ في `%LOCALAPPDATA%\HamzaPublisher`. مفاتيح API وكلمات مرور ووردبريس مشفّرة بـ DPAPI ومرتبطة بحساب Windows الحالي، فإذا نُقل الملف إلى جهاز آخر يطلب البرنامج إدخالها من جديد.
+الإعدادات والسجلات والطابور وجلسة Google تُحفظ في `%LOCALAPPDATA%\HamzaPublisher` على Windows، وفي `$XDG_DATA_HOME/hamza-publisher` أو `~/.local/share/hamza-publisher` على Linux وmacOS. تُشفّر مفاتيح API وكلمات مرور ووردبريس بـ DPAPI المرتبط بحساب Windows الحالي. تُحفظ هذه القيم كنص عادي على Linux وmacOS.
 
 ## حل المشاكل الشائعة
 

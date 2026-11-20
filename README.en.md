@@ -28,9 +28,13 @@ It talks to the providers directly with your own API keys: no monthly subscripti
 
 ## Install
 
-Download the installer from the [Releases](https://github.com/MohamedSalah-13/publisher/releases) page. It bundles its own Java runtime and installs for the current user without administrator rights.
+Choose the installer for your system and processor from [Releases](https://github.com/MohamedSalah-13/publisher/releases). Each package bundles Java.
 
-> The app targets **Windows 10/11**. Running from source elsewhere is possible, but secret encryption relies on Windows; on other systems keys are stored as plain text.
+- **Windows 10/11 (x64)** — run the `.exe` to install for the current user.
+- **Ubuntu 24.04 and compatible Debian-based distributions (x64 or ARM64)** — install the matching `.deb` with `sudo apt install ./<installer>.deb`.
+- **macOS (Intel or Apple Silicon)** — open the matching `.dmg` and drag Hamza Publisher to Applications. The builds don't include Apple Developer ID signing or notarization.
+
+Installed copies check GitHub Releases automatically. The dashboard also has **Check for updates**. On Linux and macOS, the app downloads and opens the installer for you to finish. The Windows portable ZIP is updated manually.
 
 ## Setup
 
@@ -84,12 +88,15 @@ cd publisher
 | `./mvnw test` | Run the tests |
 | `./mvnw clean package` | Build the runnable jar in `target/` |
 | `.\packaging\build-installer.ps1` | Build the Windows installer in `target\installer\` |
+| `pwsh ./packaging/build-installer.ps1` | Build a native `.deb` on Linux or `.dmg` on macOS in `target/installer/` |
 
-Building the installer needs [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases), or pass `-Type app-image` for a portable build without WiX. A `credentials.json` in the project root is bundled into the installer; pass `-NoCredentials` to leave it out.
+Windows packaging needs [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases), except for `-Type app-image` (portable ZIP). Linux packaging needs `fakeroot`, `binutils` and `dpkg-deb`. A `credentials.json` in the project root is bundled into the installer unless you pass `-NoCredentials`.
+
+Run the **CI** workflow with **build_installers** enabled to build downloadable installers without publishing a release. A version tag on a commit containing the packaging workflow builds and publishes every platform. Set the version in `pom.xml` to match the new tag first.
 
 ## Where data lives
 
-Settings, logs, the queue and the Google session are stored in `%LOCALAPPDATA%\HamzaPublisher`. API keys and WordPress passwords are DPAPI-encrypted and tied to the current Windows account, so a file copied to another machine makes the app ask for them again.
+Settings, logs, the queue and the Google session live in `%LOCALAPPDATA%\HamzaPublisher` on Windows and `$XDG_DATA_HOME/hamza-publisher` or `~/.local/share/hamza-publisher` on Linux and macOS. Windows encrypts API keys and WordPress passwords with DPAPI tied to the current account. Linux and macOS store those values as plain text.
 
 ## Contributing
 

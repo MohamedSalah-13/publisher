@@ -32,6 +32,7 @@ module com.hamzatech.publisher {
     requires org.kordamp.ikonli.feather;
     requires com.sun.jna;
     requires com.sun.jna.platform;
+    requires com.hamza.updater;
 
     opens com.hamzatech.publisher to javafx.fxml;
     exports com.hamzatech.publisher;

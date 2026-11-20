@@ -17,7 +17,19 @@
         <lombok.version>1.18.44</lombok.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>com.github.MohamedSalah-13</groupId>
+            <artifactId>desktop-updater</artifactId>
+            <version>v0.4.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>

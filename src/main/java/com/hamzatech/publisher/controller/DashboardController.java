@@ -1,6 +1,7 @@
 package com.hamzatech.publisher.controller;
 
 import com.google.api.services.blogger.model.Blog;
+import com.hamza.updater.fx.UpdatePrompt;
 import com.hamzatech.publisher.model.BatchPublishResult;
 import com.hamzatech.publisher.model.BatchStatus;
 import com.hamzatech.publisher.model.BlogCategory;
@@ -70,6 +71,7 @@ public class DashboardController {
     private ComboBox<String> cmbLanguage;
     @FXML
     private Button btnThemeToggle;
+    @FXML private Button btnUpdates;
     @FXML
     private FlowPane categoriesPane;
     @FXML
@@ -155,6 +157,9 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
+        boolean canCheckUpdates = !Boolean.getBoolean("publisher.portable");
+        btnUpdates.setVisible(canCheckUpdates);
+        btnUpdates.setManaged(canCheckUpdates);
         log.info("Initializing DashboardController");
         bundle = localeManager.getResourceBundle();
 
@@ -932,6 +937,13 @@ public class DashboardController {
             loadCategoryFilter();
             filterBlogsByCategory();
         }, null);
+    }
+
+    @FXML
+    private void handleCheckForUpdates() {
+        if (btnUpdates.getScene().getWindow().getProperties().get(UpdatePrompt.class) instanceof UpdatePrompt updates) {
+            updates.checkNow();
+        }
     }
 
     @FXML

@@ -66,6 +66,11 @@
                 <graphic><FontIcon iconLiteral="fth-settings"/></graphic>
                 <tooltip><Tooltip text="%dashboard.settings.button"/></tooltip>
             </Button>
+            <Button fx:id="btnUpdates" onAction="#handleCheckForUpdates" styleClass="button-icon"
+                    accessibleText="%dashboard.updates.check">
+                <graphic><FontIcon iconLiteral="fth-refresh-cw"/></graphic>
+                <tooltip><Tooltip text="%dashboard.updates.check"/></tooltip>
+            </Button>
             <Button onAction="#handleLogout" styleClass="danger, flat, button-icon">
                 <graphic><FontIcon iconLiteral="fth-log-out"/></graphic>
                 <tooltip><Tooltip text="%dashboard.logout.button"/></tooltip>

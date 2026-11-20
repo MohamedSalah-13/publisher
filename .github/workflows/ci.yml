@@ -1,7 +1,6 @@
 # Runs the test suite on every push to main and on pull requests.
 #
-# Windows, not Linux: the app is Windows-only and the DPAPI secret-encryption tests are skipped
-# anywhere else. On a private repository Windows minutes count double; a run takes about 3 minutes.
+# The regular test job runs on Windows so that it exercises DPAPI encryption.
 # A change that only touches docs/ or Markdown files skips the run, since there is nothing to test.
 name: CI
 
@@ -16,6 +15,11 @@ on:
       - 'docs/**'
       - '**.md'
   workflow_dispatch:
+    inputs:
+      build_installers:
+        description: Build native installers on all supported platforms
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -26,6 +30,7 @@ permissions:
 
 jobs:
   test:
+    if: ${{ !inputs.build_installers }}
     runs-on: windows-2022
     timeout-minutes: 20
     steps:
@@ -47,3 +52,7 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports/
           retention-days: 7
+
+  installers:
+    if: ${{ inputs.build_installers }}
+    uses: ./.github/workflows/package.yml

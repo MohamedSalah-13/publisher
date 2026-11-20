@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds a Windows installer for Hamza Publisher with jpackage.
+    Builds a native installer for Hamza Publisher with jpackage.
 
 .DESCRIPTION
     Produces target\installer\Hamza Publisher-<version>.exe: a per-user installer that bundles its
@@ -8,15 +8,16 @@
     menu entry and a desktop shortcut, and a fixed upgrade UUID makes a newer installer replace an
     older install instead of installing side by side.
 
-    -Type app-image builds a portable folder (zipped) instead, which needs no WiX.
+    On Windows, -Type app-image builds a portable zip instead, which needs no WiX.
+    On Linux, -Type deb builds a Debian package. On macOS, -Type dmg builds a disk image.
+    Run on the target OS with a JDK for the target architecture.
 
 .PARAMETER Type
-    exe (default), msi or app-image.
+    exe (default on Windows), msi, app-image, deb (Linux) or dmg (macOS).
 
 .PARAMETER NoCredentials
     Do not bundle credentials.json even if it exists in the project root. Without it, users
-    must place their own credentials.json in %LOCALAPPDATA%\HamzaPublisher before signing in to
-    Blogger.
+    can import their own credentials.json in the setup wizard before signing in to Blogger.
 
 .PARAMETER SkipBuild
     Reuse target\publisher-<version>.jar instead of running "mvnw package".
@@ -27,8 +28,8 @@
     .\packaging\build-installer.ps1 -Type app-image -NoCredentials
 #>
 param(
-    [ValidateSet('exe', 'msi', 'app-image')]
-    [string]$Type = 'exe',
+    [ValidateSet('exe', 'msi', 'app-image', 'deb', 'dmg')]
+    [string]$Type,
     [switch]$NoCredentials,
     [switch]$SkipBuild,
     [string]$WixPath
@@ -37,6 +38,13 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
+
+$windows = -not ($IsLinux -or $IsMacOS)
+$supportedTypes = if ($IsLinux) { 'deb' } elseif ($IsMacOS) { 'dmg' } else { 'exe', 'msi', 'app-image' }
+if (-not $Type) { $Type = @($supportedTypes)[0] }
+if ($Type -notin $supportedTypes) { throw "Package type '$Type' is unavailable on this OS." }
+$jpackageCommand = if ($windows) { 'bin/jpackage.exe' } else { 'bin/jpackage' }
+$mavenWrapper = if ($windows) { 'mvnw.cmd' } else { 'mvnw' }
 
 $AppName = 'Hamza Publisher'
 $Vendor = 'Hamza Tech'
@@ -57,13 +65,13 @@ $Modules = @(
 function Find-Jdk {
     $candidates = @()
     if ($env:JAVA_HOME) { $candidates += $env:JAVA_HOME }
-    $jdks = Join-Path $env:USERPROFILE '.jdks'
+    $jdks = Join-Path ([Environment]::GetFolderPath('UserProfile')) '.jdks'
     if (Test-Path $jdks) {
         $candidates += Get-ChildItem $jdks -Directory | Where-Object { $_.Name -match '25' } |
             Sort-Object Name -Descending | ForEach-Object { $_.FullName }
     }
     foreach ($jdkHome in $candidates) {
-        $jpackage = Join-Path $jdkHome 'bin\jpackage.exe'
+        $jpackage = Join-Path $jdkHome $jpackageCommand
         $release = Join-Path $jdkHome 'release'
         if ((Test-Path $jpackage) -and (Test-Path $release)) {
             $line = Select-String -Path $release -Pattern '^JAVA_VERSION="(\d+)' | Select-Object -First 1
@@ -89,7 +97,7 @@ $jdk = Find-Jdk
 $env:JAVA_HOME = $jdk
 Write-Host "JDK:  $jdk"
 
-if ($Type -ne 'app-image') {
+if ($windows -and $Type -ne 'app-image') {
     $wix = Find-Wix
     if (-not $wix) {
         throw ("WiX Toolset 3 is required for -Type $Type. Install it (winget install WiXToolset.WiXToolset), " +
@@ -110,21 +118,21 @@ if ($appVersion -notmatch '^\d+(\.\d+){0,2}$') {
 Write-Host "Version: $appVersion (pom $pomVersion)"
 
 $jarName = "publisher-$pomVersion.jar"
-$jar = Join-Path $root "target\$jarName"
+$jar = Join-Path $root "target/$jarName"
 if (-not $SkipBuild) {
     # A previous installer can come out read-only, and "mvn clean" cannot delete read-only files;
     # Remove-Item -Force can, so clear the old output before Maven tries.
     $oldOutput = Join-Path $root 'target\installer'
     if (Test-Path $oldOutput) { Remove-Item $oldOutput -Recurse -Force }
     Write-Host 'Building the runnable jar...'
-    & (Join-Path $root 'mvnw.cmd') -q -DskipTests clean package
+    & (Join-Path $root $mavenWrapper) -q -DskipTests clean package
     if ($LASTEXITCODE -ne 0) { throw 'Maven build failed.' }
 }
 if (-not (Test-Path $jar)) { throw "Jar not found: $jar" }
 
 # jpackage copies everything in --input into the app folder, so stage only what belongs there.
-$staging = Join-Path $root 'target\installer-input'
-$dest = Join-Path $root 'target\installer'
+$staging = Join-Path $root 'target/installer-input'
+$dest = Join-Path $root 'target/installer'
 foreach ($dir in @($staging, $dest)) {
     if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
     New-Item -ItemType Directory -Path $dir | Out-Null
@@ -137,7 +145,7 @@ if ((Test-Path $credentials) -and -not $NoCredentials) {
     Copy-Item $credentials $staging
     Write-Host 'Bundling credentials.json (your Google OAuth client). Use -NoCredentials to leave it out.' -ForegroundColor Yellow
 } else {
-    Write-Host 'Not bundling credentials.json: users place their own in %LOCALAPPDATA%\HamzaPublisher.'
+    Write-Host 'Not bundling credentials.json: users can import their own in the setup wizard.'
 }
 
 $jpackageArgs = @(
@@ -146,7 +154,6 @@ $jpackageArgs = @(
     '--app-version', $appVersion,
     '--vendor', $Vendor,
     '--description', 'Generate and publish articles to Blogger and WordPress with AI',
-    '--icon', (Join-Path $root 'tool.ico'),
     '--input', $staging,
     '--main-jar', 'publisher.jar',
     '--main-class', $MainClass,
@@ -156,7 +163,12 @@ $jpackageArgs = @(
     # JNA (secret encryption) and JavaFX call native code; without this Java 25 prints warnings.
     '--java-options', '--enable-native-access=ALL-UNNAMED'
 )
-if ($Type -ne 'app-image') {
+if ($windows) {
+    $jpackageArgs += @('--icon', (Join-Path $root 'tool.ico'))
+}
+if ($Type -eq 'app-image') {
+    $jpackageArgs += @('--java-options', '-Dpublisher.portable=true')
+} elseif ($windows) {
     $jpackageArgs += @(
         '--win-per-user-install',
         '--win-dir-chooser',
@@ -164,18 +176,45 @@ if ($Type -ne 'app-image') {
         '--win-shortcut', '--win-shortcut-prompt',
         '--win-upgrade-uuid', $UpgradeUuid
     )
+} elseif ($IsLinux) {
+    $jpackageArgs += @(
+        '--icon', (Join-Path $root 'docs/branding/app-icon-512.png'),
+        '--linux-package-name', 'hamza-publisher',
+        '--linux-shortcut',
+        '--linux-package-deps', 'libgtk-3-0 | libgtk-3-0t64, libasound2 | libasound2t64'
+    )
+} else {
+    $jpackageArgs += @('--mac-package-identifier', 'com.hamzatech.publisher')
+}
+
+if (-not $windows) {
+    $jdkArch = Select-String -LiteralPath (Join-Path $jdk 'release') -Pattern '^OS_ARCH="([^"]+)"$'
+    $arch = switch ($jdkArch.Matches[0].Groups[1].Value) {
+        { $_ -in 'x86_64', 'amd64' } { 'x64' }
+        { $_ -in 'aarch64', 'arm64' } { 'arm64' }
+        default { throw "Unsupported JDK architecture: $_" }
+    }
+    $platform = if ($IsLinux) { 'linux' } else { 'macos' }
 }
 
 Write-Host "Running jpackage ($Type)..."
-& (Join-Path $jdk 'bin\jpackage.exe') @jpackageArgs
+& (Join-Path $jdk $jpackageCommand) @jpackageArgs
 if ($LASTEXITCODE -ne 0) { throw 'jpackage failed.' }
 
 if ($Type -eq 'app-image') {
     $zip = Join-Path $dest "$AppName-$appVersion-portable.zip"
     Compress-Archive -Path (Join-Path $dest $AppName) -DestinationPath $zip
     Write-Host "Portable build: $zip" -ForegroundColor Green
-} else {
+} elseif ($windows) {
     Get-ChildItem $dest -Filter "*.$Type" | ForEach-Object {
         Write-Host ("Installer: {0} ({1:N0} MB)" -f $_.FullName, ($_.Length / 1MB)) -ForegroundColor Green
     }
+} else {
+    $packages = @(Get-ChildItem -LiteralPath $dest -File -Filter "*.$Type")
+    if ($packages.Count -ne 1) { throw "Expected one .$Type package in $dest." }
+    $fileName = "hamza-publisher-$appVersion-$platform-$arch.$Type"
+    if ($packages[0].Name -ne $fileName) {
+        Rename-Item -LiteralPath $packages[0].FullName -NewName $fileName
+    }
+    Write-Host "Installer: $(Join-Path $dest $fileName)" -ForegroundColor Green
 }

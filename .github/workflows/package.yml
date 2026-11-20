@@ -1,0 +1,111 @@
+name: Package installers
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        description: Existing release tag to package. Empty uses the calling commit.
+    secrets:
+      GOOGLE_CREDENTIALS_JSON:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: ${{ matrix.platform }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: windows, arch: x64, runner: windows-2022, type: exe }
+          - { platform: linux, arch: x64, runner: ubuntu-24.04, type: deb }
+          - { platform: linux, arch: arm64, runner: ubuntu-24.04-arm, type: deb }
+          - { platform: macos, arch: x64, runner: macos-15-intel, type: dmg }
+          - { platform: macos, arch: arm64, runner: macos-15, type: dmg }
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Check the tag matches pom.xml
+        if: inputs.tag != ''
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          [xml]$pom = Get-Content pom.xml
+          $version = $pom.project.version
+          if ($env:TAG -cne "v$version" -or $version -notmatch '^\d+\.\d+\.\d+$') {
+            throw "Tag $env:TAG must match the X.Y.Z version in pom.xml ($version)."
+          }
+
+      - name: Install WiX 3.14
+        if: runner.os == 'Windows'
+        run: |
+          $dir = Join-Path $env:USERPROFILE '.tools/wix314'
+          $zip = Join-Path $env:RUNNER_TEMP 'wix.zip'
+          Invoke-WebRequest -Uri 'https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip' -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir -Force
+
+      - name: Install Linux packaging dependencies
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fakeroot binutils libgtk-3-0t64 libasound2t64
+
+      - name: Test and build the application
+        run: |
+          if ($IsWindows) { ./mvnw.cmd -B package } else { ./mvnw -B package }
+
+      - name: Write the optional Blogger OAuth client
+        if: inputs.tag != ''
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: |
+          if ($env:GOOGLE_CREDENTIALS_JSON) {
+            Set-Content -LiteralPath credentials.json -Value $env:GOOGLE_CREDENTIALS_JSON -Encoding utf8NoBOM
+          }
+
+      - name: Build the native installer
+        env:
+          PACKAGE_TYPE: ${{ matrix.type }}
+        run: ./packaging/build-installer.ps1 -Type $env:PACKAGE_TYPE -SkipBuild
+
+      - name: Build the Windows portable zip
+        if: runner.os == 'Windows'
+        run: |
+          $installer = Get-ChildItem target/installer -Filter '*.exe' -File
+          if (@($installer).Count -ne 1) { throw 'Expected exactly one Windows installer.' }
+          $savedInstaller = Join-Path $env:RUNNER_TEMP $installer.Name
+          Move-Item -LiteralPath $installer.FullName -Destination $savedInstaller
+          ./packaging/build-installer.ps1 -Type app-image -SkipBuild
+          Move-Item -LiteralPath $savedInstaller -Destination target/installer/
+
+      - name: Remove credentials.json
+        if: always() && inputs.tag != ''
+        run: Remove-Item -LiteralPath credentials.json -ErrorAction SilentlyContinue
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: installer-${{ matrix.platform }}-${{ matrix.arch }}
+          path: |
+            target/installer/*-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.type }}
+            target/installer/*.exe
+            target/installer/*-portable.zip
+          if-no-files-found: error
+          retention-days: 30
