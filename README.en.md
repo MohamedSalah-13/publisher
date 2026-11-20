@@ -1,5 +1,7 @@
 # Hamza Publisher
 
+[![CI](https://github.com/MohamedSalah-13/publisher/actions/workflows/ci.yml/badge.svg)](https://github.com/MohamedSalah-13/publisher/actions/workflows/ci.yml) ![Java](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white) ![JavaFX](https://img.shields.io/badge/JavaFX-25-1F6FB2) ![Blogger](https://img.shields.io/badge/Blogger-API-FF5722?logo=blogger&logoColor=white) ![WordPress](https://img.shields.io/badge/WordPress-REST-21759B?logo=wordpress&logoColor=white) ![License](https://img.shields.io/badge/License-MIT-yellow)
+
 [العربية](README.md) · **English**
 
 A desktop app that auto-publishes articles to **Blogger** blogs and **WordPress** sites from a list of titles in an Excel file. For each title it writes the article with AI, fetches a header image, adds SEO metadata and internal links, publishes, then shares the link to Telegram or Facebook.
