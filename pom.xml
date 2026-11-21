@@ -18,6 +18,18 @@
     </properties>
 
     <repositories>
+        <!-- Named so that it is asked first. A project's own repositories come before the inherited Central,
+             and JitPack answers some coordinates it does not have (xml-apis:xml-apis-ext, for one) with an
+             empty file instead of 404: Maven keeps the empty jar and a build with an empty local repository
+             fails with "zip file is empty". -->
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- Serves desktop-updater straight from its GitHub tags. -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
