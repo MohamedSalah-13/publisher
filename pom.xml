@@ -29,7 +29,7 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <!-- Serves desktop-updater straight from its GitHub tags. -->
+        <!-- Serves desktop-updater and app-icons straight from their GitHub tags. -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
@@ -41,6 +41,14 @@
             <groupId>com.github.MohamedSalah-13</groupId>
             <artifactId>desktop-updater</artifactId>
             <version>v0.4.0</version>
+        </dependency>
+        <!-- Writes the icon files (github.com/MohamedSalah-13/app-icons). Only docs/branding/IconRender.java uses it:
+             test scope keeps it out of the installer, and Maven still downloads the jar that script runs with. -->
+        <dependency>
+            <groupId>com.github.MohamedSalah-13</groupId>
+            <artifactId>app-icons</artifactId>
+            <version>v0.1.0</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
