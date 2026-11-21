@@ -1,3 +1,5 @@
+import com.hamza.icons.IconDrawing;
+import com.hamza.icons.IconSet;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -23,15 +25,22 @@ import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** Draws candidate app icons on a 512 grid and renders them at any size. */
+/**
+ * Draws the app icon, and the two rejected candidates, on a 512 grid and renders them at any size.
+ * JavaFX draws; the files are written by the app-icons library the programs share
+ * (github.com/MohamedSalah-13/app-icons). How to run it is in this folder's README.
+ */
 public class IconRender extends Application {
 
-    static String OUT;
+    /** The sizes a candidate is previewed at; the program's own files take the library's usual sizes. */
+    static final int[] PREVIEW_SIZES = {16, 24, 32, 48, 64, 128, 256, 512};
     static final Color BLUE = Color.web("#2F6DB5");
     static final Color ORANGE = Color.web("#FF8A1F");
     static final Color ORANGE_DARK = Color.web("#D9640A");
@@ -148,20 +157,43 @@ public class IconRender extends Application {
         return holder.snapshot(p, null);
     }
 
-    static void save(WritableImage img, File f) throws Exception {
+    static BufferedImage buffered(WritableImage img) {
         int w = (int) img.getWidth(), h = (int) img.getHeight();
         BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)
                 bi.setRGB(x, y, img.getPixelReader().getArgb(x, y));
-        ImageIO.write(bi, "png", f);
+        return bi;
+    }
+
+    /** A candidate as the library takes it: each size is JavaFX's own picture of it, pixel for pixel. */
+    static IconDrawing drawing(Supplier<Group> icon) {
+        return new IconDrawing() {
+            @Override
+            public void draw(Graphics2D g, int size) {
+                g.drawImage(render(size), 0, 0, null);
+            }
+
+            @Override
+            public BufferedImage render(int size) {
+                return buffered(IconRender.render(icon, size));
+            }
+        };
     }
 
     @Override
     public void start(Stage stage) throws Exception {
         String mode = getParameters().getRaw().get(0);
+        Path target = Path.of(getParameters().getRaw().get(1));
         List<Supplier<Group>> options = List.of(IconRender::optionA, IconRender::optionB, IconRender::optionC);
-        if (mode.equals("sheet")) {
+        if (mode.equals("write")) {
+            // The program's files, from the chosen design (A). target is the project root.
+            IconSet.of(drawing(IconRender::optionA))
+                    .pngs("src/main/resources/com/hamzatech/publisher/images/app-icon-%d.png") // the windows (util.AppIcons)
+                    .ico("tool.ico")                                                            // the Windows launcher and installer
+                    .png("docs/branding/app-icon-512.png", 512)                                 // the Linux package, and the master render
+                    .write(target);
+        } else if (mode.equals("sheet")) {
             HBox row = new HBox(40);
             row.setPadding(new Insets(30));
             String[] names = {"A", "B", "C"};
@@ -179,19 +211,18 @@ public class IconRender extends Application {
             }
             row.setStyle("-fx-background-color: #F3F4F6;");
             new Scene(row);
-            save(row.snapshot(null, null), new File(OUT, "icon_options.png"));
+            ImageIO.write(buffered(row.snapshot(null, null)), "png", new File(target.toFile(), "icon_options.png"));
         } else {
+            // One candidate as loose PNGs, to look at: icon_16.png ... icon_512.png in target.
             int idx = "ABC".indexOf(mode);
-            for (int size : new int[]{16, 24, 32, 48, 64, 128, 256, 512}) {
-                save(render(options.get(idx), size), new File(OUT, "icon_" + size + ".png"));
-            }
+            IconSet.of(drawing(options.get(idx))).pngs("icon_%d.png", PREVIEW_SIZES).write(target);
         }
         System.out.println("RENDER OK " + mode);
         Platform.exit();
     }
 
+    /** {@code write <project root>}, {@code sheet <out dir>}, or {@code A|B|C <out dir>}. */
     public static void main(String[] args) {
-        OUT = args[1];
-        launch(args[0]);
+        launch(args);
     }
 }
