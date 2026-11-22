@@ -191,6 +191,7 @@ public class IconRender extends Application {
             IconSet.of(drawing(IconRender::optionA))
                     .pngs("src/main/resources/com/hamzatech/publisher/images/app-icon-%d.png") // the windows (util.AppIcons)
                     .ico("tool.ico")                                                            // the Windows launcher and installer
+                    .icns("tool.icns")                                                          // the macOS app and disk image
                     .png("docs/branding/app-icon-512.png", 512)                                 // the Linux package, and the master render
                     .write(target);
         } else if (mode.equals("sheet")) {

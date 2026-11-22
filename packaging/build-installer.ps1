@@ -167,7 +167,11 @@ if ($Type -eq 'app-image') {
         '--linux-package-deps', 'libgtk-3-0 | libgtk-3-0t64, libasound2 | libasound2t64'
     )
 } else {
-    $jpackageArgs += @('--mac-package-identifier', 'com.hamzatech.publisher')
+    # Without it the app and the disk image show Java's default icon (tool.icns: docs/branding/IconRender.java).
+    $jpackageArgs += @(
+        '--icon', (Join-Path $root 'tool.icns'),
+        '--mac-package-identifier', 'com.hamzatech.publisher'
+    )
 }
 
 if (-not $windows) {

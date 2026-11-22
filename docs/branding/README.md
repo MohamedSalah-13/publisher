@@ -16,6 +16,7 @@ This writes every file the program ships, straight into place:
 
 - `src/main/resources/com/hamzatech/publisher/images/app-icon-<size>.png`, 16 to 256: `util.AppIcons` gives the window every size so Windows picks the sharpest one for each place.
 - `tool.ico`, for Windows packaging.
+- `tool.icns`, for the macOS app and disk image.
 - `docs/branding/app-icon-512.png`, for the Linux package.
 
 JavaFX does the drawing; the shared [app-icons](https://github.com/MohamedSalah-13/app-icons) library writes the files. It is a test-scope dependency in `pom.xml`, so the installer does not carry it.
