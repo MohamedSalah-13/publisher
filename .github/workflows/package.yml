@@ -30,10 +30,23 @@ jobs:
     defaults:
       run:
         shell: pwsh
+    env:
+      DESKTOP_UPDATER_HOME: ${{ github.workspace }}/.desktop-updater
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.sha }}
+          persist-credentials: false
+
+      # build-installer.ps1 imports desktop-updater's tools/Packaging.psm1, pinned to a commit so nothing
+      # changes here without a pull request in this repository. Inside the workspace, after this
+      # repository's own checkout, which would clean it away.
+      - name: Check out desktop-updater's packaging module
+        uses: actions/checkout@v5
+        with:
+          repository: MohamedSalah-13/desktop-updater
+          ref: 2a6177177e6cf275f0d79986a70e41037a13e6bf
+          path: .desktop-updater
           persist-credentials: false
 
       - uses: actions/setup-java@v5

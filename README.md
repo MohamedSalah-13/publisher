@@ -118,7 +118,7 @@ cd publisher
 | `.\packaging\build-installer.ps1` | بناء مثبّت Windows في `target\installer\` |
 | `pwsh ./packaging/build-installer.ps1` | بناء حزمة `.deb` على Linux أو `.dmg` على macOS في `target/installer/` |
 
-تحزيم Windows يحتاج [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases)، ويمكن بناء النسخة المحمولة باستخدام `-Type app-image` بلا WiX. تحزيم Linux يحتاج `fakeroot` و`binutils` و`dpkg-deb`. إن وُجد `credentials.json` في جذر المشروع يُضمَّن في المثبّت ما لم تستخدم `-NoCredentials`.
+تحزيم Windows يحتاج [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases)، ويمكن بناء النسخة المحمولة باستخدام `-Type app-image` بلا WiX. تحزيم Linux يحتاج `fakeroot` و`binutils` و`dpkg-deb`. إن وُجد `credentials.json` في جذر المشروع يُضمَّن في المثبّت ما لم تستخدم `-NoCredentials`. ويحتاج السكربت نسخة من [desktop-updater](https://github.com/MohamedSalah-13/desktop-updater) بجوار هذا المستودع (أو المسار في `DESKTOP_UPDATER_HOME`): خطوات التحزيم المشتركة بين البرامج في `tools/Packaging.psm1` هناك.
 
 شغّل سير عمل **CI** مع تفعيل **build_installers** لبناء حزم قابلة للتنزيل دون نشر إصدار. ينشر سير عمل Release حزم كل الأنظمة عند دفع وسم إصدار يشير إلى كومِت يتضمن إعداد التحزيم. حدّث رقم الإصدار في `pom.xml` ليطابق الوسم الجديد أولًا.
 
