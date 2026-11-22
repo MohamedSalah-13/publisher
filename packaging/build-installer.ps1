@@ -12,6 +12,11 @@
     On Linux, -Type deb builds a Debian package. On macOS, -Type dmg builds a disk image.
     Run on the target OS with a JDK for the target architecture.
 
+    The steps every program's packaging script repeats (finding the JDK and WiX, Maven, the version,
+    the installer's options, the published name) come from desktop-updater's tools/Packaging.psm1,
+    found in a clone of desktop-updater beside this repository or where DESKTOP_UPDATER_HOME points.
+    What is Hamza Publisher's own stays here.
+
 .PARAMETER Type
     exe (default on Windows), msi, app-image, deb (Linux) or dmg (macOS).
 
@@ -39,12 +44,24 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-$windows = -not ($IsLinux -or $IsMacOS)
-$supportedTypes = if ($IsLinux) { 'deb' } elseif ($IsMacOS) { 'dmg' } else { 'exe', 'msi', 'app-image' }
+# desktop-updater is looked for beside the repository, wherever in it this script sits.
+$updaterHome = $env:DESKTOP_UPDATER_HOME
+if (-not $updaterHome) {
+    $repository = & git -C $root rev-parse --show-toplevel 2>$null
+    if (-not $repository) { $repository = $root }
+    $updaterHome = Join-Path (Split-Path -Parent $repository) 'desktop-updater'
+}
+$packaging = Join-Path $updaterHome 'tools/Packaging.psm1'
+if (-not (Test-Path -LiteralPath $packaging)) {
+    throw "desktop-updater was not found at $updaterHome. Clone https://github.com/MohamedSalah-13/desktop-updater beside this repository, or set DESKTOP_UPDATER_HOME."
+}
+Import-Module $packaging -Force
+
+$platform = Get-PackagingPlatform
+$windows = $platform -eq 'windows'
+$supportedTypes = switch ($platform) { 'linux' { 'deb' } 'macos' { 'dmg' } default { 'exe', 'msi', 'app-image' } }
 if (-not $Type) { $Type = @($supportedTypes)[0] }
 if ($Type -notin $supportedTypes) { throw "Package type '$Type' is unavailable on this OS." }
-$jpackageCommand = if ($windows) { 'bin/jpackage.exe' } else { 'bin/jpackage' }
-$mavenWrapper = if ($windows) { 'mvnw.cmd' } else { 'mvnw' }
 
 $AppName = 'Hamza Publisher'
 $Vendor = 'Hamza Tech'
@@ -62,71 +79,39 @@ $Modules = @(
     'java.logging', 'jdk.localedata', 'jdk.charsets', 'jdk.crypto.ec', 'jdk.zipfs', 'jdk.accessibility'
 ) -join ','
 
-function Find-Jdk {
-    $candidates = @()
-    if ($env:JAVA_HOME) { $candidates += $env:JAVA_HOME }
-    $jdks = Join-Path ([Environment]::GetFolderPath('UserProfile')) '.jdks'
-    if (Test-Path $jdks) {
-        $candidates += Get-ChildItem $jdks -Directory | Where-Object { $_.Name -match '25' } |
-            Sort-Object Name -Descending | ForEach-Object { $_.FullName }
-    }
-    foreach ($jdkHome in $candidates) {
-        $jpackage = Join-Path $jdkHome $jpackageCommand
-        $release = Join-Path $jdkHome 'release'
-        if ((Test-Path $jpackage) -and (Test-Path $release)) {
-            $line = Select-String -Path $release -Pattern '^JAVA_VERSION="(\d+)' | Select-Object -First 1
-            if ($line -and [int]$line.Matches[0].Groups[1].Value -ge 25) { return $jdkHome }
-        }
-    }
-    throw 'JDK 25 or later not found. Set JAVA_HOME to a JDK 25 installation.'
-}
-
-function Find-Wix {
-    if ($WixPath) {
-        if (Test-Path (Join-Path $WixPath 'candle.exe')) { return $WixPath }
-        throw "candle.exe not found in -WixPath '$WixPath'."
-    }
-    $onPath = Get-Command candle.exe -ErrorAction SilentlyContinue
-    if ($onPath) { return (Split-Path -Parent $onPath.Source) }
-    $portable = Join-Path $env:USERPROFILE '.tools\wix314'
-    if (Test-Path (Join-Path $portable 'candle.exe')) { return $portable }
-    return $null
-}
-
-$jdk = Find-Jdk
-$env:JAVA_HOME = $jdk
-Write-Host "JDK:  $jdk"
+# JDK 25 or later from JAVA_HOME, PATH or ~/.jdks. Maven runs on the same JDK, since the build needs 25.
+$jdk = Find-JPackage -MinimumVersion 25
+$env:JAVA_HOME = $jdk.JdkHome
+Write-Host "JDK:  $($jdk.JdkHome)"
 
 if ($windows -and $Type -ne 'app-image') {
-    $wix = Find-Wix
-    if (-not $wix) {
-        throw ("WiX Toolset 3 is required for -Type $Type. Install it (winget install WiXToolset.WiXToolset), " +
-               "unzip wix314-binaries.zip into $env:USERPROFILE\.tools\wix314, pass -WixPath, " +
-               "or use -Type app-image.")
+    if ($WixPath) {
+        if (-not (Test-Path (Join-Path $WixPath 'candle.exe'))) { throw "candle.exe not found in -WixPath '$WixPath'." }
+        $env:PATH = "$WixPath;$env:PATH"
+        $wix = $WixPath
+    } else {
+        try {
+            $wix = Find-WiX
+        } catch {
+            throw ("WiX Toolset 3 is required for -Type $Type. Install it (winget install WiXToolset.WiXToolset), " +
+                   "unzip wix314-binaries.zip into $env:USERPROFILE\.tools\wix314, pass -WixPath, " +
+                   "or use -Type app-image.")
+        }
     }
-    $env:PATH = "$wix;$env:PATH"
     Write-Host "WiX:  $wix"
 }
 
 # jpackage accepts only 1-3 numeric components, so 1.0-SNAPSHOT becomes 1.0.
-[xml]$pom = Get-Content (Join-Path $root 'pom.xml')
-$pomVersion = $pom.project.version
-$appVersion = ($pomVersion -replace '-.*$', '')
-if ($appVersion -notmatch '^\d+(\.\d+){0,2}$') {
-    throw "Cannot turn the pom version '$pomVersion' into an installer version."
-}
-Write-Host "Version: $appVersion (pom $pomVersion)"
+$pomVersion = (Get-PomVersion -Pom (Join-Path $root 'pom.xml') -Platform $platform)
+$appVersion = $pomVersion.Version
+Write-Host "Version: $appVersion (pom $($pomVersion.Raw))"
 
-$jarName = "publisher-$pomVersion.jar"
+$jarName = "publisher-$($pomVersion.Raw).jar"
 $jar = Join-Path $root "target/$jarName"
 if (-not $SkipBuild) {
-    # A previous installer can come out read-only, and "mvn clean" cannot delete read-only files;
-    # Remove-Item -Force can, so clear the old output before Maven tries.
-    $oldOutput = Join-Path $root 'target\installer'
-    if (Test-Path $oldOutput) { Remove-Item $oldOutput -Recurse -Force }
+    # Clears the read-only installer of an earlier run first, which "mvn clean" cannot delete on JDK 25.
     Write-Host 'Building the runnable jar...'
-    & (Join-Path $root $mavenWrapper) -q -DskipTests clean package
-    if ($LASTEXITCODE -ne 0) { throw 'Maven build failed.' }
+    Invoke-MavenBuild -Pom (Join-Path $root 'pom.xml') -Arguments @('-q', '-DskipTests', 'clean', 'package')
 }
 if (-not (Test-Path $jar)) { throw "Jar not found: $jar" }
 
@@ -134,7 +119,10 @@ if (-not (Test-Path $jar)) { throw "Jar not found: $jar" }
 $staging = Join-Path $root 'target/installer-input'
 $dest = Join-Path $root 'target/installer'
 foreach ($dir in @($staging, $dest)) {
-    if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
+    if (Test-Path $dir) {
+        [void](Clear-ReadOnly -Path $dir)
+        Remove-Item $dir -Recurse -Force
+    }
     New-Item -ItemType Directory -Path $dir | Out-Null
 }
 Copy-Item $jar (Join-Path $staging 'publisher.jar')
@@ -169,14 +157,9 @@ if ($windows) {
 if ($Type -eq 'app-image') {
     $jpackageArgs += @('--java-options', '-Dpublisher.portable=true')
 } elseif ($windows) {
-    $jpackageArgs += @(
-        '--win-per-user-install',
-        '--win-dir-chooser',
-        '--win-menu', '--win-menu-group', $Vendor,
-        '--win-shortcut', '--win-shortcut-prompt',
-        '--win-upgrade-uuid', $UpgradeUuid
-    )
-} elseif ($IsLinux) {
+    $jpackageArgs += @(Get-WinInstallerArgument -PerUser -DirChooser -Menu -MenuGroup $Vendor -Shortcut -UpgradeUuid $UpgradeUuid)
+    $jpackageArgs += '--win-shortcut-prompt'
+} elseif ($platform -eq 'linux') {
     $jpackageArgs += @(
         '--icon', (Join-Path $root 'docs/branding/app-icon-512.png'),
         '--linux-package-name', 'hamza-publisher',
@@ -188,18 +171,21 @@ if ($Type -eq 'app-image') {
 }
 
 if (-not $windows) {
-    $jdkArch = Select-String -LiteralPath (Join-Path $jdk 'release') -Pattern '^OS_ARCH="([^"]+)"$'
+    # The JDK's architecture, not the machine's: an x64 JDK under Rosetta builds an x64 package.
+    $jdkArch = Select-String -LiteralPath (Join-Path $jdk.JdkHome 'release') -Pattern '^OS_ARCH="([^"]+)"$'
     $arch = switch ($jdkArch.Matches[0].Groups[1].Value) {
         { $_ -in 'x86_64', 'amd64' } { 'x64' }
         { $_ -in 'aarch64', 'arm64' } { 'arm64' }
         default { throw "Unsupported JDK architecture: $_" }
     }
-    $platform = if ($IsLinux) { 'linux' } else { 'macos' }
 }
 
 Write-Host "Running jpackage ($Type)..."
-& (Join-Path $jdk $jpackageCommand) @jpackageArgs
-if ($LASTEXITCODE -ne 0) { throw 'jpackage failed.' }
+try {
+    Invoke-Native -FilePath $jdk.Path -ArgumentList $jpackageArgs
+} catch {
+    throw 'jpackage failed.'
+}
 
 if ($Type -eq 'app-image') {
     $zip = Join-Path $dest "$AppName-$appVersion-portable.zip"
@@ -210,11 +196,6 @@ if ($Type -eq 'app-image') {
         Write-Host ("Installer: {0} ({1:N0} MB)" -f $_.FullName, ($_.Length / 1MB)) -ForegroundColor Green
     }
 } else {
-    $packages = @(Get-ChildItem -LiteralPath $dest -File -Filter "*.$Type")
-    if ($packages.Count -ne 1) { throw "Expected one .$Type package in $dest." }
-    $fileName = "hamza-publisher-$appVersion-$platform-$arch.$Type"
-    if ($packages[0].Name -ne $fileName) {
-        Rename-Item -LiteralPath $packages[0].FullName -NewName $fileName
-    }
-    Write-Host "Installer: $(Join-Path $dest $fileName)" -ForegroundColor Green
+    $package = Rename-PlatformPackage -Directory $dest -Type $Type -Name 'hamza-publisher' -Version $appVersion -Platform $platform -Arch $arch
+    Write-Host "Installer: $($package.FullName)" -ForegroundColor Green
 }

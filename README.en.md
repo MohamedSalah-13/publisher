@@ -90,7 +90,7 @@ cd publisher
 | `.\packaging\build-installer.ps1` | Build the Windows installer in `target\installer\` |
 | `pwsh ./packaging/build-installer.ps1` | Build a native `.deb` on Linux or `.dmg` on macOS in `target/installer/` |
 
-Windows packaging needs [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases), except for `-Type app-image` (portable ZIP). Linux packaging needs `fakeroot`, `binutils` and `dpkg-deb`. A `credentials.json` in the project root is bundled into the installer unless you pass `-NoCredentials`.
+Windows packaging needs [WiX Toolset 3](https://github.com/wixtoolset/wix3/releases), except for `-Type app-image` (portable ZIP). Linux packaging needs `fakeroot`, `binutils` and `dpkg-deb`. A `credentials.json` in the project root is bundled into the installer unless you pass `-NoCredentials`. The script needs a clone of [desktop-updater](https://github.com/MohamedSalah-13/desktop-updater) beside this repository (or `DESKTOP_UPDATER_HOME`): the packaging steps the programs share are its `tools/Packaging.psm1`.
 
 Run the **CI** workflow with **build_installers** enabled to build downloadable installers without publishing a release. A version tag on a commit containing the packaging workflow builds and publishes every platform. Set the version in `pom.xml` to match the new tag first.
 
